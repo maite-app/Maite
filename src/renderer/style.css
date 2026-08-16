@@ -409,21 +409,9 @@ body {
   transition: opacity 0.6s ease;
 }
 
-#stage.ac-stubble #ac-stubble,
-#stage.ac-moustache #ac-moustache,
-#stage.ac-beard #ac-beard,
 #stage.ac-glasses #ac-glasses,
-#stage.ac-shades #ac-shades,
-#stage.ac-scarf #ac-scarf,
-#stage.ac-bandage #ac-bandage,
-#stage.ac-earring #ac-earring {
+#stage.ac-shades #ac-shades {
   opacity: 1;
-}
-
-/* ひげは体より少し濃いだけ。別の色を置くと、貼り付けたように見える */
-#wear .hair {
-  fill: var(--body-dark);
-  opacity: 0.85;
 }
 
 #wear .rim {
@@ -460,18 +448,6 @@ body {
   opacity: 0.14;
 }
 
-#wear #ac-scarf .cloth {
-  fill: hsl(var(--hue) 45% 46%);
-  stroke: hsl(var(--hue) 45% 34%);
-  stroke-width: 2;
-}
-
-#wear #ac-bandage .patch {
-  fill: #f2e9dc;
-  stroke: #cbbfae;
-  stroke-width: 1.5;
-}
-
 /* ---- ケガ ----------------------------------------------------------
    **直前の一戦に負けたときだけ、1 時間。**（appearance.js の hurtFor）
 
@@ -506,16 +482,6 @@ body {
   stroke-width: 2.5;
   stroke-linecap: round;
   opacity: 0.7;
-}
-
-#wear #ac-earring .stud {
-  fill: hsl(45 80% 62%);
-}
-#wear #ac-earring .wire {
-  fill: none;
-  stroke: hsl(45 60% 52%);
-  stroke-width: 2.5;
-  stroke-linecap: round;
 }
 
 /* ---- 装備と、育ちの段 ------------------------------------------------

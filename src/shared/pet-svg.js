@@ -202,6 +202,9 @@ window.AIPET_SVG = `
     <!--
       顔まわりの小物。**顔より手前**（目と口の上に乗る）。
 
+      🔴 **目元だけ**（2026-08-16 の判断）。ひげ・マフラー・絆創膏・耳飾りは
+      素の顔の良さを消していたので落とした。足すときは同じ目で見ること。
+
       **これは買えるスキンとは別物。** どれも作業ログから生えているので、
       目つき・口元と出どころが同じ ── だから顔に掛かってよい（買えるスキンの
       ほうは、いままでどおり顔に一切触らない。DESIGN.md §8c）。
@@ -210,18 +213,6 @@ window.AIPET_SVG = `
       **同じ場所のものは同時に出ない**（appearance.js が段の大きいほうだけ返す）。
     -->
     <g id="wear">
-      <!-- 口元 ── 一緒に過ごした長さで伸びる -->
-      <g class="worn" id="ac-stubble">
-        <path class="hair" d="M84 150 q 16 10 32 0 q -4 12 -16 12 q -12 0 -16 -12 Z" />
-      </g>
-      <g class="worn" id="ac-moustache">
-        <path class="hair" d="M78 134 q 20 -8 22 3 q 2 -11 22 -3 q -8 11 -22 8 q -14 3 -22 -8 Z" />
-      </g>
-      <g class="worn" id="ac-beard">
-        <path class="hair" d="M78 134 q 20 -8 22 3 q 2 -11 22 -3 q -8 11 -22 8 q -14 3 -22 -8 Z" />
-        <path class="hair" d="M80 150 q 20 13 40 0 q -3 18 -20 18 q -17 0 -20 -18 Z" />
-      </g>
-
       <!-- 目元 ── 眼鏡は学者、サングラスは夜目から -->
       <g class="worn" id="ac-glasses">
         <circle class="rim" cx="80" cy="126" r="14" />
@@ -245,24 +236,6 @@ window.AIPET_SVG = `
         <path class="shine" d="M114 120 h5 l-6 12 h-5 Z" />
         <path class="rim" d="M94 123 h12 M65 119 h70" />
       </g>
-
-      <!-- 首 ── 席に着いた回数 -->
-      <!-- 口に掛けない。口元は型（persona.js）が決めるものなので、隠すと誰か分からなくなる -->
-      <g class="worn" id="ac-scarf">
-        <path class="cloth" d="M70 158 q 30 10 60 0 q 1 9 -6 12 q -24 8 -48 0 q -7 -3 -6 -12 Z" />
-        <path class="cloth" d="M124 169 q 10 8 7 18 q -9 1 -12 -6 Z" />
-      </g>
-
-      <!-- 頬 ── 空振りの数。**責める言葉は使わない**（やってきた証のほう） -->
-      <g class="worn" id="ac-bandage">
-        <path class="patch" d="M132 138 l14 -8 l6 10 l-14 8 Z" />
-      </g>
-
-      <!-- 耳 ── 称号の数 -->
-      <g class="worn" id="ac-earring">
-        <path class="wire" d="M50 126 v8" />
-        <circle class="stud" cx="50" cy="139" r="6" />
-      </g>
     </g>
 
     <!--
@@ -271,8 +244,7 @@ window.AIPET_SVG = `
       1 時間で勝手に治る。手当ての操作は無いし、そのあいだ弱ってもいない
       ── 数字には 1 も効かない（DESIGN.md §3「世話される側にしない」）。
 
-      **絆創膏は左の頬**（x=62 あたり）。称号の絆創膏（ac-bandage）は
-      右の頬（x=132）なので、両方出ても重ならない。
+      絆創膏は左の頬（x=62 あたり）。
     -->
     <g id="hurt">
       <!-- 深い（負けた直後） -->

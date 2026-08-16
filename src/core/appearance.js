@@ -161,17 +161,16 @@ export function hurtFor(battle, now) {
  * よい（買えるスキンのほうは、いままでどおり顔に一切触らない）。
  *
  * **同じ場所のものは重ねない。** 段（`step`）が大きいほうだけが出る ──
- * 無精ひげと顎ひげが同時に生えたら、ただの絵の事故になる。
+ * 眼鏡とサングラスが同時に掛かったら、ただの絵の事故になる。
+
+ * 🔴 **目元だけにする**（2026-08-16 の判断）。ひげ・マフラー・絆創膏・耳飾りを
+ * 一度足したが、**素の顔の良さを消していた**ので枠ごと落とした。増やすなら
+ * 「顔つきより目立たないか」を先に見る ── 顔が本体で、小物はおまけのほう。
  *
  * 条件は**普段どおり働いていれば、いつの間にか満たしている量**に置く
  * （実績と同じ縛り。狙って取りに行くものにしない）。
  */
 export const ACCESSORIES = [
-  // 口元 ── 一緒に過ごした長さ。**放っておいても伸びる**唯一の枠
-  { id: 'stubble', spot: 'chin', step: 1, from: (f) => f.ageDays >= 30 },
-  { id: 'moustache', spot: 'chin', step: 2, from: (f) => f.ageDays >= 120 },
-  { id: 'beard', spot: 'chin', step: 3, from: (f) => f.ageDays >= 365 },
-
   /*
    * 目元 ── **サングラスは夜目から。** 0〜5 時に手を動かしてきた子が掛ける、
    * というのが唯一おかしくない出どころだった（眩しいのは朝のほう）。
@@ -179,15 +178,6 @@ export const ACCESSORIES = [
    */
   { id: 'glasses', spot: 'eyes', step: 1, from: (f) => f.classId === 'scholar' },
   { id: 'shades', spot: 'eyes', step: 2, from: (f) => f.nightTier >= 1 },
-
-  // 首 ── 席に着いた回数
-  { id: 'scarf', spot: 'neck', step: 1, from: (f) => f.traits.sessions >= 150 },
-
-  // 頬 ── 空振りの数。**責めない**（絆創膏は「やってきた証」のほう）
-  { id: 'bandage', spot: 'cheek', step: 1, from: (f) => f.traits.failures >= 500 },
-
-  // 耳 ── 称号の数
-  { id: 'earring', spot: 'ear', step: 1, from: (f) => f.badges >= 15 },
 ];
 
 /**
