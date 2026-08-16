@@ -5,10 +5,10 @@
   "private": true,
   "description": "Maite ── Claude Code の作業ログから育つデスクトップ相棒",
   "license": "MIT",
-  "homepage": "https://github.com/maite-app/maite",
+  "homepage": "https://github.com/maite-app/Maite",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maite-app/maite.git"
+    "url": "git+https://github.com/maite-app/Maite.git"
   },
   "type": "module",
   "main": "src/main/main.js",
