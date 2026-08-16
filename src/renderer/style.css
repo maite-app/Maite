@@ -380,12 +380,12 @@ body {
  * 装備も一緒に古びる。**光沢だけ落として、色と大きさは変えない**
  * ── 弱くなったように見せない（実際に弱くなっていない）。
  */
-#stage.pt-2 #gear .gear-atk .edge,
-#stage.pt-2 #gear .gear-def .plate {
+#stage.pt-2 .gear-atk .edge,
+#stage.pt-2 .gear-def .plate {
   filter: saturate(0.85);
 }
-#stage.pt-3 #gear .gear-atk .edge,
-#stage.pt-3 #gear .gear-def .plate {
+#stage.pt-3 .gear-atk .edge,
+#stage.pt-3 .gear-def .plate {
   filter: saturate(0.7);
   stroke-dasharray: 22 3;
 }
@@ -526,9 +526,9 @@ body {
    色は**位**（コモン〜レジェンド）で決める。系統色（--hue）には寄せない
    ── 寄せると、位の色が人によって別物になる（スマホ側と同じ決まり）。 */
 
-#gear .gear-atk,
-#gear .gear-def,
-#gear .gear-spd,
+.gear-atk,
+.gear-def,
+.gear-spd,
 #growth .grow {
   opacity: 0;
   transition: opacity 0.5s ease;
@@ -596,36 +596,36 @@ body {
   opacity: 1;
 }
 
-#gear .gear-atk .edge {
+.gear-atk .edge {
   fill: hsl(var(--gear-atk));
   stroke: hsl(var(--gear-atk) / 0.5);
   stroke-width: 2;
 }
-#gear .gear-atk .grip,
-#gear .gear-atk .guard {
+.gear-atk .grip,
+.gear-atk .guard {
   fill: none;
-  stroke: hsl(var(--gear-atk) / 0.85);
+  stroke: hsl(var(--gear-atk));
   stroke-width: 5;
   stroke-linecap: round;
 }
-#gear #gw-bow .edge,
-#gear #gw-whip .edge {
+#gw-bow .edge,
+#gw-whip .edge {
   fill: none;
   stroke: hsl(var(--gear-atk));
   stroke-width: 4;
   stroke-linecap: round;
 }
-#gear #gw-bow .grip {
+#gw-bow .grip {
   stroke-width: 2;
   stroke: hsl(var(--gear-atk) / 0.6);
 }
 
-#gear .gear-def .plate {
-  fill: hsl(var(--gear-def) / 0.85);
+.gear-def .plate {
+  fill: hsl(var(--gear-def));
   stroke: hsl(var(--gear-def) / 0.6);
   stroke-width: 2.5;
 }
-#gear .gear-def .trim {
+.gear-def .trim {
   fill: none;
   stroke: hsl(var(--gear-def) / 0.55);
   stroke-width: 2.5;
@@ -641,12 +641,12 @@ body {
  * 囲うのをやめて、**体の後ろに柔らかい膜を敷く**形にした。守りは「囲い」ではなく
  * 「厚み」で見せる。回転も外した ── 動くものが増えるほど、相棒の表情から目が逸れる。
  */
-#gear #gw-ward .ring {
+#gw-ward .ring {
   fill: hsl(var(--gear-def) / 0.16);
   stroke: none;
 }
 /* 2本目は輪だったもの。膜を1枚にするので出さない */
-#gear #gw-ward .ring2 {
+#gw-ward .ring2 {
   display: none;
 }
 
@@ -657,18 +657,18 @@ body {
 }
 
 /* 置いていった風の筋。手前ほど濃く、後ろほど薄い */
-#gear .gear-spd .streak {
+.gear-spd .streak {
   fill: none;
   stroke: hsl(var(--gear-spd) / 0.75);
   stroke-width: 4;
   stroke-linecap: round;
   animation: streak-run 1.6s ease-in-out infinite;
 }
-#gear .gear-spd .streak:nth-child(2) {
+.gear-spd .streak:nth-child(2) {
   animation-delay: -0.35s;
   opacity: 0.8;
 }
-#gear .gear-spd .streak:nth-child(3) {
+.gear-spd .streak:nth-child(3) {
   animation-delay: -0.7s;
   opacity: 0.6;
 }
@@ -684,25 +684,25 @@ body {
     opacity: 0.9;
   }
 }
-#gear .gear-spd .feather {
-  fill: hsl(var(--gear-spd) / 0.55);
+.gear-spd .feather {
+  fill: hsl(var(--gear-spd));
   stroke: hsl(var(--gear-spd) / 0.7);
   stroke-width: 2;
 }
-#gear .gear-spd .orb,
-#gear .gear-spd .orb2 {
+.gear-spd .orb,
+.gear-spd .orb2 {
   fill: hsl(var(--gear-spd) / 0.9);
   animation: orb-drift 4.5s ease-in-out infinite;
 }
-#gear .gear-spd .orb2 {
+.gear-spd .orb2 {
   animation-delay: -2.2s;
 }
-#gear #gw-lens .glass {
+#gw-lens .glass {
   fill: hsl(var(--gear-spd) / 0.25);
   stroke: hsl(var(--gear-spd));
   stroke-width: 3;
 }
-#gear #gw-lens .grip {
+#gw-lens .grip {
   fill: none;
   stroke: hsl(var(--gear-spd));
   stroke-width: 4;

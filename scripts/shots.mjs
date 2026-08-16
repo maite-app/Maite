@@ -53,6 +53,7 @@ const HEIGHT = 1080;
  */
 const SHOTS = [
   { name: 'home', sec: null },
+  { name: 'name', sec: 'name' },
   { name: 'stats', sec: 'hexagon' },
   { name: 'dungeon', sec: 'dungeon' },
   { name: 'away', sec: 'expedition' },
@@ -108,75 +109,11 @@ function grown() {
 }
 
 const state = grown();
-/*
- * **紹介ページに合わせて英語で撮る。** 日本語で撮って英語のページに貼ると、
- * そこだけ別のアプリに見える（i18n が入っているので、撮り分けは lang 1 つ）。
- */
-const view = viewModel(state, Date.now(), { tzOffset: 540, lang: 'en' });
-console.log(`  ${view.name} Lv${view.level} · 地下 ${view.dungeon.floor} 階 · 技 ${view.skills.length}`);
 
-fs.mkdirSync(OUT, { recursive: true });
 const chrome = chromePath();
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aipet-shots-'));
 
-/*
- * **サーバーは立てない。** 一度は手元に立てて撮ったが、ページが一定間隔で
- * `/api/state` を叩き続けるので、headless が「もう描くものは無い」と判断できず
- * 帰ってこない ── かといって時間で切ると、iframe が届く前の真っ黒が撮れる。
- *
- * 代わりに、スマホ用ページの中身をそのまま 1 枚の HTML に畳んで file:// で開く。
- * **読むファイルは全部本物**（src/mobile/*・src/renderer/style.css・src/shared/*）
- * なので、画面を直せばここも直る。
- */
 const read = (...parts) => fs.readFileSync(path.join(HERE, '..', ...parts), 'utf8');
-const page = read('src', 'mobile', 'index.html')
-  .replace('<link rel="stylesheet" href="/pet.css" />', `<style>${read('src', 'renderer', 'style.css')}</style>`)
-  .replace('<link rel="stylesheet" href="/mobile.css" />', `<style>${read('src', 'mobile', 'mobile.css')}</style>`)
-  .replace('<script src="/pet-svg.js"></script>', `<script>${read('src', 'shared', 'pet-svg.js')}</script>`)
-  .replace('<script src="/gestures.js"></script>', `<script>${read('src', 'shared', 'gestures.js')}</script>`)
-  .replace(
-    '<script src="/mobile.js"></script>',
-    /*
-     * 差し替えるのは 2 つだけ。**描く中身には触らない。**
-     *   fetch     … 手元で畳んだ view をそのまま返す
-     *   setTimeout… 1 枚 撮るだけなので、後の周回は止める（止めないと、
-     *               しぐさと聞き直しが延々と続いて撮り終わらない）
-     */
-    `<script>
-       window.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(${JSON.stringify(view)}) });
-       const realTimeout = window.setTimeout;
-       window.setInterval = () => 0;
-       realTimeout(() => {
-         window.setTimeout = () => 0;
-         const out = {};
-         for (const el of document.querySelectorAll('[data-sec]')) {
-           if (el.hidden || !el.offsetHeight) continue;
-           /*
-            * **上の余白の真ん中で切る。** 節の頭ちょうどで切ると、1 つ上の
-            * パネルの最後の 1 行が半分だけ写る（実際に「文章が途中で切れた
-            * 写真」になっていた）。上に何か置いてあるなら、その下端と
-            * 節の頭の中間に置く ── 隙間の中で切れるので、どちらも欠けない。
-            */
-           // その節がまとまりの先頭なら、**見出しごと**入れる（見出しを半分に
-           // 切った写真になっていた）
-           let head = el;
-           while (head.previousElementSibling && head.previousElementSibling.classList.contains('group-head')) {
-             head = head.previousElementSibling;
-           }
-           const prev = head.previousElementSibling;
-           const above = prev && prev.offsetHeight ? prev.offsetTop + prev.offsetHeight : head.offsetTop;
-           out[el.dataset.sec] = { top: el.offsetTop, gap: Math.round((head.offsetTop + above) / 2) };
-         }
-         // 撮れる高さは --window-size そのままではない（下記）
-         out['#vh'] = window.innerHeight;
-         document.title = JSON.stringify(out);
-       }, 900);
-     </script>
-     <script>${read('src', 'mobile', 'mobile.js')}</script>`,
-  );
-
-const inner = path.join(tmp, 'page.html');
-fs.writeFileSync(inner, page);
 
 const shoot = (args) =>
   execFileSync(chrome, ['--headless', '--disable-gpu', '--no-sandbox', ...args], {
@@ -186,6 +123,27 @@ const shoot = (args) =>
     // 出力は捨てる。Chromium は headless でも警告を延々と吐く
     stdio: ['ignore', 'pipe', 'ignore'],
   });
+
+/**
+ * **`--window-size` の高さは、そのまま写る高さにならない。**
+ *
+ * headless でも窓の飾りぶんが引かれるので、500x1080 を頼むと画は 1080 で出るのに
+ * 中身は上から 993px しか描かれず、**下の 87px が背景のまま**になっていた
+ * （紹介ページに「下が切れた画面」が 3 枚並んでいた）。引かれる量は Chromium の
+ * 版で変わるので、決め打ちにせず **測って足す**。
+ *
+ * **1 回だけ測って全員で使う。** 撮る側それぞれで測っていると、撮る順を
+ * 入れ替えただけで片方が 0 のままになる。
+ */
+const winChrome = (() => {
+  const probe = path.join(tmp, 'probe.html');
+  fs.writeFileSync(probe, '<!doctype html><script>onload=()=>document.title=innerHeight</script>');
+  const dom = shoot([`--window-size=${WIDTH},${HEIGHT}`, '--virtual-time-budget=2000', '--dump-dom', `file://${probe}`]);
+  const got = dom.match(/<title>(\d+)<\/title>/);
+  const h = Math.max(0, HEIGHT - (got ? Number(got[1]) : HEIGHT));
+  if (h) console.log(`  （窓の飾り ${h}px ぶん、頼む高さを足します）`);
+  return h;
+})();
 
 /*
  * PNG の下を落とす。
@@ -279,64 +237,245 @@ function cropBottom(file, keep) {
   );
 }
 
-/*
- * **節の位置を 1 回だけ測る。** px を直打ちしていた頃は、節が 1 つ増えるたびに
- * 写真が「パネルの途中で切れた画面」になっていた ── 測れば勝手に追いつく。
+/**
+ * 撮る。**読むファイルは全部本物**（src/mobile/*・src/renderer/style.css・src/shared/*）
+ * なので、画面を直せばここも直る。
  *
- * **測るときも `--window-size` を渡す。** 渡さないと既定の 800px 幅で測ることに
- * なり、折り返しが実際の 500px と変わって、位置が全部ずれる。
+ * **言語ぶん撮る。** 英語の README に日本語の写真を貼っていた頃は、そこだけ
+ * 別のアプリに見えた ── i18n は入っているので、撮り分けは lang 1 つで足りる。
+ * 英語は `site/shots/`（紹介ページがここを読む）、日本語は `site/shots/ja/`。
  */
-const dumped = shoot([
-  `--window-size=${WIDTH},${HEIGHT}`,
-  '--virtual-time-budget=6000',
-  '--dump-dom',
-  `file://${inner}`,
-]);
-const found = dumped.match(/<title>([^<]*)<\/title>/);
-let offsets = {};
-try {
-  offsets = JSON.parse(found ? found[1].replace(/&quot;/g, '"') : '{}');
-} catch {
-  console.error('  （節の位置が読めませんでした。先頭から撮ります）');
+function capture(lang, out) {
+  /*
+   * **紹介ページに合わせて英語で撮る。** 日本語で撮って英語のページに貼ると、
+   * そこだけ別のアプリに見える（i18n が入っているので、撮り分けは lang 1 つ）。
+   */
+  const view = viewModel(state, Date.now(), { tzOffset: 540, lang });
+  console.log(`  [${lang}] ${view.name} Lv${view.level} · 地下 ${view.dungeon.floor} 階 · 技 ${view.skills.length}`);
+
+  fs.mkdirSync(out, { recursive: true });
+  /*
+   * **サーバーは立てない。** 一度は手元に立てて撮ったが、ページが一定間隔で
+   * `/api/state` を叩き続けるので、headless が「もう描くものは無い」と判断できず
+   * 帰ってこない ── かといって時間で切ると、iframe が届く前の真っ黒が撮れる。
+   *
+   * 代わりに、スマホ用ページの中身をそのまま 1 枚の HTML に畳んで file:// で開く。
+   * **読むファイルは全部本物**（src/mobile/*・src/renderer/style.css・src/shared/*）
+   * なので、画面を直せばここも直る。
+   */
+  const page = read('src', 'mobile', 'index.html')
+    .replace('<link rel="stylesheet" href="/pet.css" />', `<style>${read('src', 'renderer', 'style.css')}</style>`)
+    .replace('<link rel="stylesheet" href="/mobile.css" />', `<style>${read('src', 'mobile', 'mobile.css')}</style>`)
+    .replace('<script src="/pet-svg.js"></script>', `<script>${read('src', 'shared', 'pet-svg.js')}</script>`)
+    .replace('<script src="/gestures.js"></script>', `<script>${read('src', 'shared', 'gestures.js')}</script>`)
+    .replace(
+      '<script src="/mobile.js"></script>',
+      /*
+       * 差し替えるのは 2 つだけ。**描く中身には触らない。**
+       *   fetch     … 手元で畳んだ view をそのまま返す
+       *   setTimeout… 1 枚 撮るだけなので、後の周回は止める（止めないと、
+       *               しぐさと聞き直しが延々と続いて撮り終わらない）
+       */
+      `<script>
+         window.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve(${JSON.stringify(view)}) });
+         const realTimeout = window.setTimeout;
+         window.setInterval = () => 0;
+         realTimeout(() => {
+           window.setTimeout = () => 0;
+           const out = {};
+           for (const el of document.querySelectorAll('[data-sec]')) {
+             if (el.hidden || !el.offsetHeight) continue;
+             /*
+              * **上の余白の真ん中で切る。** 節の頭ちょうどで切ると、1 つ上の
+              * パネルの最後の 1 行が半分だけ写る（実際に「文章が途中で切れた
+              * 写真」になっていた）。上に何か置いてあるなら、その下端と
+              * 節の頭の中間に置く ── 隙間の中で切れるので、どちらも欠けない。
+              */
+             // その節がまとまりの先頭なら、**見出しごと**入れる（見出しを半分に
+             // 切った写真になっていた）
+             let head = el;
+             while (head.previousElementSibling && head.previousElementSibling.classList.contains('group-head')) {
+               head = head.previousElementSibling;
+             }
+             const prev = head.previousElementSibling;
+             const above = prev && prev.offsetHeight ? prev.offsetTop + prev.offsetHeight : head.offsetTop;
+             out[el.dataset.sec] = { top: el.offsetTop, gap: Math.round((head.offsetTop + above) / 2) };
+           }
+           // 撮れる高さは --window-size そのままではない（下記）
+           out['#vh'] = window.innerHeight;
+           document.title = JSON.stringify(out);
+         }, 900);
+       </script>
+       <script>${read('src', 'mobile', 'mobile.js')}</script>`,
+    );
+
+  const inner = path.join(tmp, `page-${lang}.html`);
+  fs.writeFileSync(inner, page);
+
+  /*
+   * **節の位置を 1 回だけ測る。** px を直打ちしていた頃は、節が 1 つ増えるたびに
+   * 写真が「パネルの途中で切れた画面」になっていた ── 測れば勝手に追いつく。
+   *
+   * **測るときも `--window-size` を渡す。** 渡さないと既定の 800px 幅で測ることに
+   * なり、折り返しが実際の 500px と変わって、位置が全部ずれる。
+   */
+  const dumped = shoot([
+    `--window-size=${WIDTH},${HEIGHT}`,
+    '--virtual-time-budget=6000',
+    '--dump-dom',
+    `file://${inner}`,
+  ]);
+  const found = dumped.match(/<title>([^<]*)<\/title>/);
+  let offsets = {};
+  try {
+    offsets = JSON.parse(found ? found[1].replace(/&quot;/g, '"') : '{}');
+  } catch {
+    console.error('  （節の位置が読めませんでした。先頭から撮ります）');
+  }
+
+  /**
+   * **`--window-size` の高さは、そのまま写る高さにならない。**
+   *
+   * headless でも窓の飾りぶんが引かれるので、500x1080 を頼むと画は 1080 で出るのに
+   * 中身は上から 993px しか描かれず、**下の 87px が背景のまま**になっていた
+   * （紹介ページに「下が切れた画面」が 3 枚並んでいた）。引かれる量は Chromium の
+   * 版で変わるので、決め打ちにせず **測って足す**。
+   */
+  const CHROME_H = winChrome;
+
+  for (const shot of SHOTS) {
+    // --screenshot はページの先頭しか撮らないので、「ずらしてから撮る」ではなく
+    // 「ずらした状態を作って撮る」しかない（包みのページ越しに撮る）
+    const y = shot.sec ? Math.max(0, (offsets[shot.sec] || {}).gap || 0) : 0;
+    const wrap = path.join(tmp, `${shot.name}.html`);
+    fs.writeFileSync(
+      wrap,
+      `<!doctype html><meta charset="utf-8">
+       <style>html,body{margin:0;overflow:hidden;background:#12141a;width:${WIDTH}px;height:${HEIGHT}px}
+       iframe{width:${WIDTH}px;height:7200px;border:0;display:block;margin-top:-${y}px}</style>
+       <iframe src="file://${inner}"></iframe>`,
+    );
+
+    const file = path.join(out, `${shot.name}.png`);
+    shoot([
+      '--force-device-scale-factor=2',
+      `--window-size=${WIDTH},${HEIGHT + CHROME_H}`,
+      '--virtual-time-budget=6000',
+      `--screenshot=${file}`,
+      `file://${wrap}`,
+    ]);
+    cropBottom(file, HEIGHT * 2); // --force-device-scale-factor=2
+    console.log(`  ✓ ${path.relative(path.join(HERE, '..'), file)}`);
+  }
+
 }
 
 /**
- * **`--window-size` の高さは、そのまま写る高さにならない。**
+ * オーバーレイ（画面の隅に出るほう）を撮る。
  *
- * headless でも窓の飾りぶんが引かれるので、500x1080 を頼むと画は 1080 で出るのに
- * 中身は上から 993px しか描かれず、**下の 87px が背景のまま**になっていた
- * （紹介ページに「下が切れた画面」が 3 枚並んでいた）。引かれる量は Chromium の
- * 版で変わるので、決め打ちにせず **測って足す**。
+ * **これが本体なのに、README には 1 枚も無かった。** スマホの写真だけだと、
+ * 常駐するアプリだと分からない。
+ *
+ * `pet.js` は Electron の preload（`window.aipet`）から state を受け取るので、
+ * **そこだけ差し替える**。描く中身には触らない ── スマホ側と同じ約束。
  */
-const inner_h = offsets['#vh'] || HEIGHT;
-const CHROME_H = Math.max(0, HEIGHT - inner_h);
-if (CHROME_H) console.log(`  （窓の飾り ${CHROME_H}px ぶん、頼む高さを足します）`);
+function captureOverlay(lang, out) {
+  const view = viewModel(state, Date.now(), { tzOffset: 540, lang });
+  // **本物の窓と同じ 200x200 で撮る。** 中央に寄せて撮ったら、吹き出しが
+  // 枠の外へ出て切れた ── 実機で見えている範囲は 200x200 そのもの。
+  const W = 200;
+  const H = 200;
+  const page = read('src', 'renderer', 'index.html')
+    .replace('<link rel="stylesheet" href="style.css" />', `<style>${read('src', 'renderer', 'style.css')}</style>`)
+    .replace('<script src="../shared/pet-svg.js"></script>', `<script>${read('src', 'shared', 'pet-svg.js')}</script>`)
+    .replace('<script src="../shared/gestures.js"></script>', `<script>${read('src', 'shared', 'gestures.js')}</script>`)
+    .replace(
+      '<script src="pet.js"></script>',
+      /*
+       * 差し替えるのは 3 つ。
+       *   window.aipet  … Electron の代わりに、手元で畳んだ view を 1 回渡す
+       *   localStorage  … file:// では触った瞬間に例外が飛ぶ（描画ごと止まる）
+       *   setInterval   … 1 枚撮るだけなので、後の周回は止める
+       */
+      `<style>html,body{background:#12141a}</style>
+       <script>
+         (() => {
+           const mem = {};
+           try { window.localStorage.getItem('x'); } catch {
+             Object.defineProperty(window, 'localStorage', {
+               value: {
+                 getItem: (k) => (k in mem ? mem[k] : null),
+                 setItem: (k, v) => { mem[k] = String(v); },
+                 removeItem: (k) => { delete mem[k]; },
+               },
+             });
+           }
+         })();
+         window.aipet = { onState: (cb) => cb(${JSON.stringify(view)}), onSaved: () => {} };
+         window.setInterval = () => 0;
+       </script>
+       <script>${read('src', 'renderer', 'pet.js')}</script>`,
+    );
 
-for (const shot of SHOTS) {
-  // --screenshot はページの先頭しか撮らないので、「ずらしてから撮る」ではなく
-  // 「ずらした状態を作って撮る」しかない（包みのページ越しに撮る）
-  const y = shot.sec ? Math.max(0, (offsets[shot.sec] || {}).gap || 0) : 0;
-  const wrap = path.join(tmp, `${shot.name}.html`);
-  fs.writeFileSync(
-    wrap,
-    `<!doctype html><meta charset="utf-8">
-     <style>html,body{margin:0;overflow:hidden;background:#12141a;width:${WIDTH}px;height:${HEIGHT}px}
-     iframe{width:${WIDTH}px;height:7200px;border:0;display:block;margin-top:-${y}px}</style>
-     <iframe src="file://${inner}"></iframe>`,
-  );
-
-  const file = path.join(OUT, `${shot.name}.png`);
+  fs.mkdirSync(out, { recursive: true });
+  const inner = path.join(tmp, `overlay-${lang}.html`);
+  fs.writeFileSync(inner, page);
+  const file = path.join(out, 'overlay.png');
   shoot([
     '--force-device-scale-factor=2',
-    `--window-size=${WIDTH},${HEIGHT + CHROME_H}`,
+    `--window-size=${W},${H + winChrome}`,
     '--virtual-time-budget=6000',
     `--screenshot=${file}`,
-    `file://${wrap}`,
+    `file://${inner}`,
   ]);
-  cropBottom(file, HEIGHT * 2); // --force-device-scale-factor=2
-  console.log(`  ✓ site/shots/${shot.name}.png`);
+  cropBottom(file, H * 2);
+  console.log(`  ✓ ${path.relative(path.join(HERE, '..'), file)}`);
 }
 
+/**
+ * 名刺（`src/renderer/card.html`）を撮る。**1200x630** ── SNS がこの比で切る。
+ *
+ * アプリが自分で書き出すものと**同じ HTML/CSS** をそのまま撮る。紹介用に
+ * 作り直した画は撮らない（`saveCard()` が出すものと、README に貼るものが
+ * ズレないようにする）。
+ */
+function captureCard(lang, out) {
+  const view = viewModel(state, Date.now(), { tzOffset: 540, lang });
+  const W = 1200;
+  const H = 630;
+  const page = read('src', 'renderer', 'card.html')
+    .replace('<link rel="stylesheet" href="style.css" />', `<style>${read('src', 'renderer', 'style.css')}</style>`)
+    .replace('<script src="../shared/pet-svg.js"></script>', `<script>${read('src', 'shared', 'pet-svg.js')}</script>`)
+    .replace(
+      '<script src="card.js"></script>',
+      `<script>
+         window.aipet = { onCard: (cb) => cb(${JSON.stringify(view)}), cardReady: () => {} };
+       </script>
+       <script>${read('src', 'renderer', 'card.js')}</script>`,
+    );
+
+  fs.mkdirSync(out, { recursive: true });
+  const inner = path.join(tmp, `card-${lang}.html`);
+  fs.writeFileSync(inner, page);
+  const file = path.join(out, 'card.png');
+  shoot([
+    `--window-size=${W},${H + winChrome}`,
+    '--virtual-time-budget=6000',
+    `--screenshot=${file}`,
+    `file://${inner}`,
+  ]);
+  cropBottom(file, H);
+  console.log(`  ✓ ${path.relative(path.join(HERE, '..'), file)}`);
+}
+
+
+capture('en', OUT);
+capture('ja', path.join(OUT, 'ja'));
+captureOverlay('en', OUT);
+captureOverlay('ja', path.join(OUT, 'ja'));
+captureCard('en', OUT);
+captureCard('ja', path.join(OUT, 'ja'));
+
 fs.rmSync(tmp, { recursive: true, force: true });
-console.log('\n  紹介ページ（site/index.html）はこれを読みます。画面を直したら撮り直すこと。\n');
+console.log('\n  紹介ページ（site/index.html）と README はこれを読みます。画面を直したら撮り直すこと。\n');
 process.exit(0);

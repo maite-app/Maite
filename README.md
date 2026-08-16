@@ -13,7 +13,11 @@ Work on your laptop, work in Claude Code on the web — stand up the server and 
 
 **日本語 → [README.ja.md](README.ja.md)**
 
-![Maite](docs/preview.png)
+![Maite](site/shots/card.png)
+
+<img src="site/shots/overlay.png" alt="The overlay, actual size, in the corner of the screen" width="200">
+
+*Actual size. That is the whole of it, bottom-right of your screen, until you go looking for the detail.*
 
 ## Privacy
 
@@ -74,11 +78,11 @@ Five classes:
 
 | Class | Tools that feed it |
 |---|---|
-| Artisan | `Bash` |
+| Artisan | `Bash` `BashOutput` `KillShell` |
 | Seeker | `WebSearch` `WebFetch` `mcp__*` |
-| Builder | `Write` `Edit` |
+| Architect | `Write` `Edit` `NotebookEdit` |
 | Scholar | `Read` `Grep` `Glob` |
-| Commander | `Task` |
+| Commander | `Task` `Agent` `Workflow` |
 
 Antenna at Lv3, crown at Lv10, aura at Lv15. Until a class settles it stays colourless; the moment it does, colour arrives.
 
@@ -93,8 +97,8 @@ skills, auto-battles, idle expeditions, the dungeon, titles and skins.
   else's creature turns up on your screen.
 - **Phase 3** — elemental matchups, gear and weekly events. The first two landed
   early (the dungeon brought them forward), so what is left here is events.
-- **Not in the plan yet, but wanted** — a packaged installer, so you do not need
-  Node installed to run it.
+- **Landed since** — a packaged Windows installer, so you do not need Node
+  installed to run it. macOS and Linux are still from source.
 
 Beyond that there is no roadmap, on purpose. **This gets built in whatever direction
 the people writing it find interesting**, and it will keep being built that way. It
