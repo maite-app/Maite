@@ -41,7 +41,7 @@ body {
 #body {
   fill: var(--body);
   stroke: var(--body-dark);
-  stroke-width: 3.5;
+  stroke-width: 2.8;
   filter: drop-shadow(0 4px 10px hsl(var(--hue) 40% 20% / 0.35));
 }
 
@@ -51,7 +51,7 @@ body {
  */
 #sheen {
   fill: #fff;
-  opacity: 0.16;
+  opacity: 0.1;
   pointer-events: none;
 }
 
@@ -1423,10 +1423,10 @@ body {
 
 /* 外に出て行く人は口が大きい／籠る人は結んでいる */
 #stage.p-out #mouth {
-  d: path('M89 143 Q 100 159 111 143');
+  d: path('M91 142 Q 100 154 109 142');
 }
 #stage.p-in #mouth {
-  d: path('M95 147 Q 100 149 105 147');
+  d: path('M96 146 Q 100 147.5 104 146');
 }
 
 /* 組み立てる人は目が寄っている（近くを見る）／動かす人は離れて広く見る */
@@ -1469,11 +1469,11 @@ body {
 @keyframes g-mouth {
   0%,
   100% {
-    d: path('M94 145 Q 100 149 106 145');
+    d: path('M95 144 Q 100 147 105 144');
     fill: transparent;
   }
   45% {
-    d: path('M90 140 Q 100 166 110 140');
+    d: path('M92 139 Q 100 159 108 139');
     fill: var(--ink);
   }
 }
@@ -1542,11 +1542,11 @@ body {
 @keyframes g-sneeze-mouth {
   0%,
   100% {
-    d: path('M94 145 Q 100 149 106 145');
+    d: path('M95 144 Q 100 147 105 144');
     fill: transparent;
   }
   50% {
-    d: path('M94 142 Q 100 159 106 142');
+    d: path('M95 141 Q 100 154 105 141');
     fill: var(--ink);
   }
 }

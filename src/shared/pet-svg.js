@@ -108,7 +108,7 @@ window.AIPET_SVG = `
 
     <path
       id="body"
-      d="M 100 82 C 142 82 156 108 156 134 C 156 156 130 166 100 166 C 70 166 44 156 44 134 C 44 108 58 82 100 82 Z"
+      d="M 100 80 C 140 80 156 107 156 132 C 156 155 130 166 100 166 C 70 166 44 155 44 132 C 44 107 60 80 100 80 Z"
     />
 
     <!--
@@ -119,11 +119,11 @@ window.AIPET_SVG = `
       口元が模様に埋もれる ── **顔つきはスキンで買えない**（§8c）。
     -->
     <!-- 体の上のつや。丸みを 1 枚で出す（クラスで色を付ける ── 直書きしない） -->
-    <path id="sheen" d="M 72 92 C 85 87 115 87 128 92 C 115 84 85 84 72 92 Z" />
+    <path id="sheen" d="M 72 90 C 85 85 115 85 128 90 C 115 82 85 82 72 90 Z" />
 
     <g id="skin-texture" clip-path="url(#body-clip)">
       <clipPath id="body-clip">
-        <path d="M 100 82 C 142 82 156 108 156 134 C 156 156 130 166 100 166 C 70 166 44 156 44 134 C 44 108 58 82 100 82 Z" />
+        <path d="M 100 80 C 140 80 156 107 156 132 C 156 155 130 166 100 166 C 70 166 44 155 44 132 C 44 107 60 80 100 80 Z" />
       </clipPath>
 
       <!-- 墨：紙目のような細い縞 -->
@@ -154,24 +154,24 @@ window.AIPET_SVG = `
     </g>
 
     <g id="face">
-      <g class="eye" transform="translate(78 128)">
-        <circle class="eyeball" r="10.5" />
-        <circle class="pupil" r="4.5" />
+      <g class="eye" transform="translate(80 126)">
+        <circle class="eyeball" r="9.8" />
+        <circle class="pupil" r="4.2" />
         <!--
           光。**これ 1 個で顔つきが変わる** ── 瞳が真っ黒のままだと、
           どんなに形を丸くしても「点」に見える。左上に寄せるのは、
           そこに光源があると読ませるため（両目とも同じ側に置く）。
         -->
-        <circle class="glint" cx="-2.8" cy="-2.8" r="2.1" />
-        <path class="lid" d="M-11 0 Q 0 7 11 0" />
+        <circle class="glint" cx="-2.7" cy="-2.7" r="2" />
+        <path class="lid" d="M-10 0 Q 0 6.5 10 0" />
       </g>
-      <g class="eye" transform="translate(122 128)">
-        <circle class="eyeball" r="9" />
-        <circle class="pupil" r="4" />
-        <circle class="glint" cx="-2.6" cy="-2.6" r="1.9" />
-        <path class="lid" d="M-10 0 Q 0 6 10 0" />
+      <g class="eye" transform="translate(120 126)">
+        <circle class="eyeball" r="9.8" />
+        <circle class="pupil" r="4.2" />
+        <circle class="glint" cx="-2.7" cy="-2.7" r="2" />
+        <path class="lid" d="M-10 0 Q 0 6.5 10 0" />
       </g>
-      <path id="mouth" d="M94 145 Q 100 149 106 145" />
+      <path id="mouth" d="M95 144 Q 100 147 105 144" />
 
       <!--
         頬の赤み。**顔つきは型が決める**ので、形には触らない ── 色を薄く
@@ -179,8 +179,8 @@ window.AIPET_SVG = `
         ほとんど出ない（無彩色の子に頬紅だけ乗ると浮く）。
       -->
       <g id="blush">
-        <ellipse cx="72" cy="138" rx="8" ry="4.5" />
-        <ellipse cx="128" cy="138" rx="8" ry="4.5" />
+        <ellipse cx="70" cy="137" rx="7.5" ry="4" />
+        <ellipse cx="130" cy="137" rx="7.5" ry="4" />
       </g>
     </g>
 
@@ -206,7 +206,7 @@ window.AIPET_SVG = `
       目つき・口元と出どころが同じ ── だから顔に掛かってよい（買えるスキンの
       ほうは、いままでどおり顔に一切触らない。DESIGN.md §8c）。
 
-      顔は 目 (82,122) / (118,122)・口 (100,142) の周り。
+      顔は 目 (80,126) / (120,126)・口 (100,144) の周り。
       **同じ場所のものは同時に出ない**（appearance.js が段の大きいほうだけ返す）。
     -->
     <g id="wear">
@@ -224,9 +224,9 @@ window.AIPET_SVG = `
 
       <!-- 目元 ── 眼鏡は学者、サングラスは夜目から -->
       <g class="worn" id="ac-glasses">
-        <circle class="rim" cx="78" cy="128" r="14.5" />
-        <circle class="rim" cx="122" cy="128" r="14.5" />
-        <path class="rim" d="M93 128 h14" />
+        <circle class="rim" cx="80" cy="126" r="14" />
+        <circle class="rim" cx="120" cy="126" r="14" />
+        <path class="rim" d="M94 126 h12" />
       </g>
       <!--
         サングラスは**中を透かさない**（style.css）。透かしていたときは、
@@ -239,11 +239,11 @@ window.AIPET_SVG = `
         「物」に見えるかが決まる）。
       -->
       <g class="worn" id="ac-shades">
-        <path class="lens" d="M65 121 h29 v13 q -15 7 -29 0 Z" />
-        <path class="lens" d="M106 121 h29 v13 q -15 7 -29 0 Z" />
-        <path class="shine" d="M73 122 h5 l-6 12 h-5 Z" />
-        <path class="shine" d="M114 122 h5 l-6 12 h-5 Z" />
-        <path class="rim" d="M94 125 h12 M65 121 h70" />
+        <path class="lens" d="M65 119 h29 v13 q -15 7 -29 0 Z" />
+        <path class="lens" d="M106 119 h29 v13 q -15 7 -29 0 Z" />
+        <path class="shine" d="M73 120 h5 l-6 12 h-5 Z" />
+        <path class="shine" d="M114 120 h5 l-6 12 h-5 Z" />
+        <path class="rim" d="M94 123 h12 M65 119 h70" />
       </g>
 
       <!-- 首 ── 席に着いた回数 -->
