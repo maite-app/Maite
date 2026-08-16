@@ -15,6 +15,86 @@ window.AIPET_SVG = `
   </g>
 
   <g id="creature">
+    <!--
+      装備のうち、**手に持つもの・脇に付くもの**は体より奥に置く。
+      前に置いていたとき、翼と盾が顔と胴に半透明で重なって、
+      **下の体が透けて見えていた**（実機の名刺でそれが一番目立った）。
+
+      奥に回せば、はみ出したぶんだけが見える ── **重ならないのではなく、
+      重なったところが隠れる**ので、装備が増えても顔が埋まらない。
+      体に「着る」もの（胴当て）だけは、下の #gear に残してある。
+
+      **触角と冠より、さらに奥。** 兜を後ろに置いたとき、兜が冠と触角の玉を
+      塗り潰していた ── 冠は Lv10 の節目で、装備より先にこの子のものなので、
+      隠されるのは装備のほう。
+    -->
+    <g id="gear-back">
+      <!-- 攻 ── 右手に持つ -->
+      <g class="gear-atk" id="gw-blade">
+        <path class="grip" d="M162 150 v14" />
+        <path class="edge" d="M158 150 l4 -58 l4 58 Z" />
+        <path class="guard" d="M152 150 h20" />
+      </g>
+      <g class="gear-atk" id="gw-axe">
+        <path class="grip" d="M164 100 v64" />
+        <path class="edge" d="M164 104 q 22 6 20 26 q -12 8 -20 -6 Z" />
+      </g>
+      <g class="gear-atk" id="gw-hammer">
+        <path class="grip" d="M164 104 v60" />
+        <path class="edge" d="M150 100 h28 v20 h-28 Z" />
+      </g>
+      <g class="gear-atk" id="gw-lance">
+        <path class="grip" d="M166 168 l-10 -70" />
+        <path class="edge" d="M156 98 l-5 -22 l11 18 Z" />
+      </g>
+      <g class="gear-atk" id="gw-bow">
+        <path class="edge" d="M158 96 q 26 34 0 68" />
+        <path class="grip" d="M158 96 L158 164" />
+      </g>
+      <g class="gear-atk" id="gw-whip">
+        <path class="grip" d="M162 148 v12" />
+        <path class="edge" d="M162 148 q 18 -8 12 -28 q -6 -16 8 -22" />
+      </g>
+      <!-- 守 ── 左に構える、もしくは体に乗る -->
+      <g class="gear-def" id="gw-shield">
+        <path class="plate" d="M20 108 h30 v26 q 0 16 -15 22 q -15 -6 -15 -22 Z" />
+        <path class="trim" d="M35 112 v40" />
+      </g>
+      <g class="gear-def" id="gw-cloak">
+        <path class="plate" d="M52 96 q -18 40 -6 74 q 20 8 26 -4 q -18 -34 -6 -68 Z" />
+      </g>
+      <!-- 兜は頭に載る。奥に回すので、**頭より上に出たぶんだけ**が見える -->
+      <g class="gear-def" id="gw-helm">
+        <path class="plate" d="M66 84 q 34 -26 68 0 q -6 10 -34 10 q -28 0 -34 -10 Z" />
+        <path class="trim" d="M100 62 v10" />
+      </g>
+      <g class="gear-def" id="gw-ward">
+        <ellipse class="ring" cx="100" cy="122" rx="63" ry="50" />
+        <ellipse class="ring2" cx="100" cy="122" rx="68" ry="54" />
+      </g>
+      <!--
+        速さの 1 つめ。**足は描かない** ── 胴体だけの子に靴を履かせると、
+        それだけで別の生き物になる。代わりに、置いていった風の筋で速さを出す。
+      -->
+      <g class="gear-spd" id="gw-dash">
+        <path class="streak" d="M34 138 h22" />
+        <path class="streak" d="M26 150 h30" />
+        <path class="streak" d="M38 162 h18" />
+      </g>
+      <g class="gear-spd" id="gw-wing">
+        <path class="feather" d="M48 106 q -30 12 -34 40 q 22 4 36 -14 Z" />
+        <path class="feather" d="M152 106 q 30 12 34 40 q -22 4 -36 -14 Z" />
+      </g>
+      <g class="gear-spd" id="gw-orb">
+        <circle class="orb" cx="168" cy="88" r="7" />
+        <circle class="orb2" cx="180" cy="102" r="4" />
+      </g>
+      <g class="gear-spd" id="gw-lens">
+        <circle class="glass" cx="150" cy="96" r="12" />
+        <path class="grip" d="M158 106 l12 14" />
+      </g>
+    </g>
+
     <!-- Lv3 で生える触角。系統が確定した合図でもある -->
     <g id="antenna">
       <path d="M100 92 Q 96 68 108 56" />
@@ -233,77 +313,15 @@ window.AIPET_SVG = `
       顔と模様が潰れる ── 顔つきは型が決めるものなので、装備で隠さない。
     -->
     <g id="gear">
-      <!-- 攻 ── 右手に持つ -->
-      <g class="gear-atk" id="gw-blade">
-        <path class="grip" d="M162 150 v14" />
-        <path class="edge" d="M158 150 l4 -58 l4 58 Z" />
-        <path class="guard" d="M152 150 h20" />
-      </g>
-      <g class="gear-atk" id="gw-axe">
-        <path class="grip" d="M164 100 v64" />
-        <path class="edge" d="M164 104 q 22 6 20 26 q -12 8 -20 -6 Z" />
-      </g>
-      <g class="gear-atk" id="gw-hammer">
-        <path class="grip" d="M164 104 v60" />
-        <path class="edge" d="M150 100 h28 v20 h-28 Z" />
-      </g>
-      <g class="gear-atk" id="gw-lance">
-        <path class="grip" d="M166 168 l-10 -70" />
-        <path class="edge" d="M156 98 l-5 -22 l11 18 Z" />
-      </g>
-      <g class="gear-atk" id="gw-bow">
-        <path class="edge" d="M158 96 q 26 34 0 68" />
-        <path class="grip" d="M158 96 L158 164" />
-      </g>
-      <g class="gear-atk" id="gw-whip">
-        <path class="grip" d="M162 148 v12" />
-        <path class="edge" d="M162 148 q 18 -8 12 -28 q -6 -16 8 -22" />
-      </g>
-
-      <!-- 守 ── 左に構える、もしくは体に乗る -->
-      <g class="gear-def" id="gw-shield">
-        <path class="plate" d="M20 108 h30 v26 q 0 16 -15 22 q -15 -6 -15 -22 Z" />
-        <path class="trim" d="M35 112 v40" />
-      </g>
+      <!--
+        手前に残すのは**体に着るもの**だけ ── 胴当ては腹に貼り付くので、
+        奥に回すと丸ごと消える（体の内側にしか無い）。
+      -->
       <!-- 胴当ては**腹に置く**。胸まで上げると口と目に掛かる ── 顔つきは
            型が決めるものなので、装備で隠さない（§8c） -->
       <g class="gear-def" id="gw-plate">
         <path class="plate" d="M66 150 h68 q -4 16 -34 16 q -30 0 -34 -16 Z" />
         <path class="trim" d="M100 150 v15" />
-      </g>
-      <g class="gear-def" id="gw-cloak">
-        <path class="plate" d="M52 96 q -18 40 -6 74 q 20 8 26 -4 q -18 -34 -6 -68 Z" />
-      </g>
-      <g class="gear-def" id="gw-helm">
-        <path class="plate" d="M68 92 q 32 -20 64 0 q -6 10 -32 10 q -26 0 -32 -10 Z" />
-        <path class="trim" d="M100 74 v10" />
-      </g>
-      <g class="gear-def" id="gw-ward">
-        <ellipse class="ring" cx="100" cy="122" rx="63" ry="50" />
-        <ellipse class="ring2" cx="100" cy="122" rx="68" ry="54" />
-      </g>
-
-      <!-- 速 ── 足元と背 -->
-      <!--
-        速さの 1 つめ。**足は描かない** ── 胴体だけの子に靴を履かせると、
-        それだけで別の生き物になる。代わりに、置いていった風の筋で速さを出す。
-      -->
-      <g class="gear-spd" id="gw-dash">
-        <path class="streak" d="M34 138 h22" />
-        <path class="streak" d="M26 150 h30" />
-        <path class="streak" d="M38 162 h18" />
-      </g>
-      <g class="gear-spd" id="gw-wing">
-        <path class="feather" d="M48 106 q -30 12 -34 40 q 22 4 36 -14 Z" />
-        <path class="feather" d="M152 106 q 30 12 34 40 q -22 4 -36 -14 Z" />
-      </g>
-      <g class="gear-spd" id="gw-orb">
-        <circle class="orb" cx="168" cy="88" r="7" />
-        <circle class="orb2" cx="180" cy="102" r="4" />
-      </g>
-      <g class="gear-spd" id="gw-lens">
-        <circle class="glass" cx="150" cy="96" r="12" />
-        <path class="grip" d="M158 106 l12 14" />
       </g>
     </g>
 
