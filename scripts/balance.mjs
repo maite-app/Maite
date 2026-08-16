@@ -48,6 +48,30 @@ function fighter(classId, level, skills = []) {
 
 const pct = (v) => `${Math.round(v * 100)}%`.padStart(5);
 
+/*
+ * **線を機械で判定する。**
+ *
+ * 前は判定文が人間向けの注記でしかなく、閾値を超えても常に exit 0 だった
+ * ── CLAUDE.md の「数字を触ったら balance を通す」が、通しても落ちないので
+ * 掟として機能していなかった（2026-08-16 の監査で実測）。
+ *
+ * 線の出どころは CLAUDE.md。**ここの数字を緩めるときは、向こうも直すこと。**
+ */
+const LINES = {
+  classSpread: [0.45, 0.55], // ① 同レベルなら系統ごとの平均勝率
+  gapShape: 12,              // ② 同じ差なら、どのレベル帯でも勝率の開きは このpt 以内
+  skillGain: 25,             // ③ 技 1 つの寄与（pt・未満）
+  grownRate: [0.45, 0.65],   // ④ 実際に育てた個体の勝率
+  worstRun: 12,              // ④ 連敗（戦・以下）
+};
+
+const FAILURES = [];
+
+function check(line, ok, detail) {
+  if (!ok) FAILURES.push(`${line} … ${detail}`);
+  console.log(`  ${ok ? '✓' : '🔴'} ${line} … ${detail}`);
+}
+
 function rate(a, b, n, tag) {
   let win = 0;
   for (let i = 0; i < n; i += 1) {
@@ -78,6 +102,14 @@ function classes(n = 400) {
       console.log(CLASSES[a].ja.padEnd(6) + CLASS_IDS.map((b) => pct(rows[a][b])).join('') + pct(avg[a]));
     }
     console.log(`  系統間のブレ幅 ${spread.toFixed(1)}pt ${spread < 12 ? '' : '← 偏っている'}`);
+    const lo = Math.min(...CLASS_IDS.map((c) => avg[c]));
+    const hi = Math.max(...CLASS_IDS.map((c) => avg[c]));
+    const worstId = CLASS_IDS.find((c) => avg[c] === lo || avg[c] === hi);
+    check(
+      `① Lv${level} 系統平均 ${Math.round(LINES.classSpread[0] * 100)}〜${Math.round(LINES.classSpread[1] * 100)}%`,
+      lo >= LINES.classSpread[0] && hi <= LINES.classSpread[1],
+      `${Math.round(lo * 100)}〜${Math.round(hi * 100)}%（外れているのは ${CLASSES[worstId].ja}）`,
+    );
   }
 }
 
@@ -87,14 +119,48 @@ function levels(n = 400) {
   const gaps = [-0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5];
   console.log('\n── レベル差の効き方（同系統どうし・技なし）─────────');
   console.log('   差:' + gaps.map((g) => `${g > 0 ? '+' : ''}${Math.round(g * 100)}%`.padStart(6)).join(''));
+  /*
+   * **同じ対戦を 2 回並べない。** 相手のレベルは `round(level * (1 + gap))` で
+   * 出すので、レベルが低いと丸めが効いて別々の列が同じ相手になる ── Lv5 では
+   * 7 列のうち実質 5 種類しかなく、`-10%` と `0%` が同じ Lv5 戦、`+10%` と
+   * `+20%` が同じ Lv6 戦だった。そこで出た 47% と 51% の差は、レベル差の
+   * 効き方ではなく**同じ対戦を別の種で回しただけの差**で、これを表に並べると
+   * 「Lv5 だけ形が違う」という読み違いを生む（2026-08-16 の監査で実測）。
+   *
+   * 潰れた列は数字を出さずに `──` を置く。**測れていないことを見せるほうが、
+   * 測れたふりをするより役に立つ。**
+   */
+  const measured = [];
   for (const level of [5, 10, 20, 50, 100]) {
-    const row = gaps.map((gap) => {
+    const cells = gaps.map((gap) => {
       const foe = Math.max(1, Math.round(level * (1 + gap)));
-      return pct(rate(fighter('commander', level), fighter('commander', foe), n, `L${level}g${gap}`));
+      // **頼んだ差と、実際に測っている差が同じときだけ測る。**
+      // 重複を外すだけでは足りない ── Lv5 の `-10%` は 4.5 が 5 に丸まって
+      // 「Lv5 対 Lv5」になり、名前は -10% のまま中身は 0% だった。
+      // 刻みの半分（0.05）より外れたら、その列は測れていない。
+      if (Math.abs(foe / level - 1 - gap) > 0.05) return null;
+      return rate(fighter('commander', level), fighter('commander', foe), n, `L${level}g${gap}`);
     });
-    console.log(`Lv${String(level).padStart(3)}: ${row.join(' ')}`);
+    measured.push({ level, cells });
+    console.log(`Lv${String(level).padStart(3)}: ${cells.map((v) => (v === null ? '  ──  ' : pct(v))).join(' ')}`);
   }
-  console.log('  どの行も似た形になっていれば、レベル差はどの高さでも同じだけ効いている');
+  console.log('  ── は、丸めで頼んだ差にならなかった列（測っていない）');
+
+  /*
+   * ② の合格条件。「似た形」では誰も判定できないので、**同じ差の列を縦に見て、
+   * レベル帯ごとの勝率の開きが何 pt までか**で決める。閾値は実測から置いた
+   * （N=400・p=0.5 の標準誤差が約 2.5pt なので、±2σ の 10pt では狭すぎる）。
+   */
+  gaps.forEach((gap, i) => {
+    const col = measured.map((r) => r.cells[i]).filter((v) => v !== null);
+    if (col.length < 2) return; // 1 行しか測れていない列は判定しない
+    const spread = (Math.max(...col) - Math.min(...col)) * 100;
+    check(
+      `② 差 ${gap > 0 ? '+' : ''}${Math.round(gap * 100)}% の縦の開き ${LINES.gapShape}pt 以内`,
+      spread <= LINES.gapShape,
+      `${spread.toFixed(1)}pt（${col.length} 行）`,
+    );
+  });
 }
 
 function botRates(level, skills, n = 600, night = false) {
@@ -137,12 +203,19 @@ function skills() {
   const night = (id) => id === 'nightVision';
   for (const id of SKILL_IDS) {
     const base = botRates(20, [], 600, night(id));
+    let best = -Infinity;
     const cells = [1, 2, 3].map((tier) => {
       const got = botRates(20, [{ id, tier }], 600, night(id));
       const diff = Math.round((got - base) * 100);
+      best = Math.max(best, diff);
       return `★${tier} ${pct(got)}(${diff >= 0 ? '+' : ''}${diff}pt)`;
     });
     console.log(`  ${SKILLS[id].ja.padEnd(4)}${night(id) ? '(夜)' : '    '} ${cells.join('  ')}`);
+    check(
+      `③ ${SKILLS[id].ja} の寄与 +${LINES.skillGain}pt 未満`,
+      best < LINES.skillGain,
+      `最大 +${best}pt`,
+    );
   }
   console.log('  1 つで +25pt を超える技があるなら、それだけが勝敗を決めている');
 }
@@ -241,6 +314,13 @@ function streaks() {
     console.log(
       `  Lv${String(level).padStart(3)}: 勝率 ${pct(win / bouts)}  最長の連敗 ${String(worst).padStart(2)} 戦（${worst * 2} 時間ぶん）`,
     );
+    const r = win / bouts;
+    check(
+      `④ Lv${level} の勝率 ${Math.round(LINES.grownRate[0] * 100)}〜${Math.round(LINES.grownRate[1] * 100)}%`,
+      r >= LINES.grownRate[0] && r <= LINES.grownRate[1],
+      `${Math.round(r * 100)}%`,
+    );
+    check(`④ Lv${level} の連敗 ${LINES.worstRun} 戦以下`, worst <= LINES.worstRun, `${worst} 戦`);
   }
   console.log('  眺めるだけの相棒が丸一日負け続けると、「ブレなければ報われる」の逆になる');
 }
@@ -308,3 +388,15 @@ if (!what || what === 'skills') skills();
 if (!what || what === 'pace') pace();
 if (!what || what === 'streaks') streaks();
 if (!what || what === 'dungeon') dungeon();
+
+/*
+ * **落ちる。** 線を外していたら exit 1 にする ── そうでないと
+ * 「balance を通した」が何の証拠にもならない。
+ */
+if (FAILURES.length) {
+  console.log(`\n🔴 線を ${FAILURES.length} 本外している\n`);
+  for (const f of FAILURES) console.log(`  ${f}`);
+  console.log('\n  線の出どころは CLAUDE.md。数字を動かすか、線を実測に合わせるかは人が決める。\n');
+  process.exit(1);
+}
+console.log('\n✓ 線は全部内側\n');
