@@ -71,8 +71,8 @@ app.setPath('userData', path.join(app.getPath('appData'), `aipet-${lockScope}`))
  */
 const isPrimary = app.requestSingleInstanceLock();
 if (!isPrimary) {
-  console.error('[aipet] もう 1 匹が動いているので、こちらは終わります（画面のほうを出しました）。');
-  console.error('        入れ替えるなら、先に動いているほうを終わらせてから起動してください。');
+  console.error('[aipet] もう 1 匹が動いているので こちらは終わります（画面のほうを出しました）');
+  console.error('        入れ替えるなら 先に動いているほうを終わらせてから起動してください');
   app.quit();
 }
 

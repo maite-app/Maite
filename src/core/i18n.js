@@ -84,11 +84,11 @@ const MESSAGES = {
     'panel.recap': 'ひと月のふりかえり',
 
     // 章のまとまり（目次の見出し）
-    'group.now': 'いま',
-    'group.self': 'この子のこと',
-    'group.power': 'できること',
-    'group.events': 'できごと',
-    'group.record': '記録',
+    'group.now': '現況',
+    'group.self': '素性',
+    'group.power': '戦力',
+    'group.events': '冒険',
+    'group.record': '軌跡',
 
     'row.dailyExp': '今日の経験値',
     'row.mood': 'ようす',
@@ -96,15 +96,15 @@ const MESSAGES = {
 
     // 名前と型
     'persona.unsettled': '見定めの途中',
-    'persona.hint': '使い込むほどに、その流儀から名が定まる',
+    'persona.hint': '使い込むほどに その流儀から名が定まる',
     'persona.note':
-      'この 2 週間の使い方から決まる。流儀が変われば、名のほうが変わる ── 打った言葉の中身は一文字も見ていない',
+      'この 2 週間の使い方で決まる　中身は一文字も見ていない',
     'persona.since': ({ day }) => `${day}から この名`,
     'persona.changed': ({ day, before }) => `${day}から。それまでは ${before}`,
     'jobs.count': ({ n }) => (n === 1 ? '歩んだ道' : `歩んだ道 ${n}`),
     // その職としての位。全体のレベルとは別に貯まる
     'jobs.level': ({ n }) => `Lv${n}`,
-    'jobs.note': '全体の位とは別に、その職として稼いだぶんが貯まる',
+    'jobs.note': '全体の位とは別に その職として稼いだぶんが貯まる',
     'badge.rough': 'うまくいかなかったほう',
     'badge.locked': ({ n }) => `ほかに ${n} つ、まだ`,
 
@@ -133,10 +133,10 @@ const MESSAGES = {
     'style.none': 'まだ道具を手にしていない',
 
     // **何を見た数字なのかを、その場に書く。** 無いと「つまずいた割合って何？」で終わる
-    'note.recovery': '空振りした道具を、そのまま通し直せた割合',
-    'note.stumble': '振るった道具のうち、返事が返らなかった割合',
-    'note.perSession': '席に着いてから離れるまでに、道具を振るう回数',
-    'note.perPrompt': 'ひと言の指示から、道具が動く回数',
+    'note.recovery': '空振りした道具を そのまま通し直せた割合',
+    'note.stumble': '振るった道具のうち 返事が返らなかった割合',
+    'note.perSession': '席に着いてから離れるまでに 道具を振るう回数',
+    'note.perPrompt': 'ひと言の指示から 道具が動く回数',
 
     // 六角形の 6 軸。**1 文字で置く**（頂点の外に置くので、長いと図が潰れる）
     'hex.atk': '攻',
@@ -145,7 +145,7 @@ const MESSAGES = {
     'hex.skill': '技',
     'hex.depth': '深',
     'hex.keep': '続',
-    'hex.note': '内側の輪が、同じ位の平均。外に出ているところが得意',
+    'hex.note': '内側の輪が 同じ位の平均　外に出ているところが得意',
 
     // 図の頂点は 1 文字のまま、下の行には**通じる名前**を出す
     'hexfull.atk': '攻撃',
@@ -157,7 +157,7 @@ const MESSAGES = {
     'note.atk': '押し込む力（装備込み）',
     'note.def': '受け止める力（装備込み）',
     'note.spd': '先に動く力（装備込み）',
-    'note.skill': '覚えた技の段位を、全部足したもの',
+    'note.skill': '覚えた技の段位を 全部足したもの',
     'note.depth': '迷宮のどこまで潜ったか',
     'note.keep': 'この 2 週間で手を動かした日',
     'hex.mult': ({ n }) => `平均の ${n} 倍`,
@@ -169,7 +169,7 @@ const MESSAGES = {
     'dungeon.recent': '近ごろの拾いもの',
     'dungeon.bonus': ({ n }) => `+${n}%`,
     'dungeon.at': ({ n }) => `${n} 階`,
-    'dungeon.note': '深く潜るほど良き品が出る。優れたものは、自ら持ち替える',
+    'dungeon.note': '深く潜るほど良き品が出る　優れたものは 自ら持ち替える',
     'dungeon.bosses': '越えてきた主',
     'dungeon.passed': ({ floor, name }) => `地下 ${floor} 階 · ${name}`,
 
@@ -181,7 +181,7 @@ const MESSAGES = {
 
     // 技が実際に動かす数字。出どころは skills.js の SKILL_POWER（battle.js と同じ）
     'skilleffect.fortitude': ({ pct }) =>
-      pct >= 100 ? '倒れる一撃を、一戦に 1 度だけ必ず耐える' : `倒れる一撃を、一戦に 1 度だけ ${pct}% で耐える`,
+      pct >= 100 ? '倒れる一撃を 一戦に 1 度だけ必ず耐える' : `倒れる一撃を、一戦に 1 度だけ ${pct}% で耐える`,
     'skilleffect.summon': ({ pct }) => `${pct}% で分身が追撃する`,
     'skilleffect.foresight': ({ pct }) => `素早さ +${pct}%`,
     'skilleffect.nightVision': ({ pct }) => `未明の一戦だけ、攻撃と素早さ +${pct}%`,
@@ -191,14 +191,14 @@ const MESSAGES = {
     'battle.locked': ({ level }) => `Lv${level} から手合わせが始まる`,
     'battle.every': ({ hours }) => `${hours} 時間ごとに一戦`,
     'battle.practice': '稽古台',
-    'battle.practiceNote': 'まだ好敵手が少ない。いまは稽古台との手合わせ',
+    'battle.practiceNote': 'まだ好敵手が少ない　いまは稽古台との手合わせ',
     'battle.vs': ({ name, className }) => `vs ${name}（${className}）`,
     'battle.win': '勝ち',
     'battle.lose': '負け',
     'battle.draw': '引き分け',
     'battle.turns': ({ n }) => `${n} ターン`,
     'battle.nightTag': '未明',
-    'battle.note': '相手の強さは伏せてある。分からないから、また見に来る',
+    'battle.note': '相手の強さは伏せてある　分からないから また見に来る',
 
     // 留守のあいだ
     'trip.head': ({ hours }) => `${hours} 時間の留守に、こんなものを拾ってきた`,
@@ -224,11 +224,11 @@ const MESSAGES = {
     'recap.best': 'いちばん多かった日',
     'recap.bestValue': ({ day, n }) => `${day}（${n} 経験値）`,
     'recap.days': ({ n }) => `${n} 日`,
-    'recap.note': '過ぎたぶんだけ。目安も、次の目標も出さない',
+    'recap.note': '過ぎたぶんだけ　目安も 次の目標も出さない',
 
     // 記念日 ── 一緒にいた長さだけで決まる。逃しても何も減らない
     'anniv.days': ({ n }) => `今日で、一緒に ${n} 日`,
-    'anniv.years': ({ n }) => (n === 1 ? '今日で、一緒に 1 年' : `今日で、一緒に ${n} 年`),
+    'anniv.years': ({ n }) => (n === 1 ? '今日で 一緒に 1 年' : `今日で、一緒に ${n} 年`),
 
     /*
      * 寝言。**責めない・急かさない**（DESIGN.md §5 の表現の線）── 「まだ
@@ -237,10 +237,10 @@ const MESSAGES = {
      */
     'sleep.build1': '…とおった……',
     'sleep.build2': '…もういっかい……',
-    'sleep.read1': '…あと、すこし……',
-    'sleep.read2': '…そこ、みてた……',
+    'sleep.read1': '…あと すこし……',
+    'sleep.read2': '…そこ みてた……',
     'sleep.write1': '…なおした……',
-    'sleep.write2': '…ここ、こう……',
+    'sleep.write2': '…ここ こう……',
     'sleep.out1': '…とおくまで……',
     'sleep.plain1': 'むにゃ……',
     'sleep.plain2': '…すぅ……',
@@ -270,7 +270,7 @@ const MESSAGES = {
     'log.fortitude': ({ who }) => `${who}は倒れずに耐えた（残り 1）`,
     'log.weaken': ({ who, other }) => `${who}が${other}の攻撃を鈍らせた`,
     'log.cleanse': ({ who }) => `${who}が弱体を振り払った`,
-    'log.timeup': '時間切れ。残る体力で判定',
+    'log.timeup': '時間切れ　残る体力で判定',
     'log.end': ({ who }) => `${who}の勝ち`,
     'log.drawEnd': '引き分け',
     'log.matchup': (m) => `${m.winner.ja}は${m.loser.ja}に強い ── ${m.reason.ja}`,
@@ -303,9 +303,9 @@ const MESSAGES = {
     'trait.none': 'まだ何もしていない',
     'note.toolCalls': 'Bash・Read・Edit … 全部あわせた数',
     'note.prompts': 'こちらから投げた言葉の数',
-    'note.sessions': '席に着いた回数。45 分空けて戻れば、次の 1 回',
-    'note.comebacks': '空振りした道具を、そのまま通し直した数',
-    'note.failures': '振るったが、返事が返らなかった数',
+    'note.sessions': '席に着いた回数　45 分空けて戻れば 次の 1 回',
+    'note.comebacks': '空振りした道具を そのまま通し直した数',
+    'note.failures': '振るったが 返事が返らなかった数',
     'note.compacts': 'compact をまたいで続いた作業の数',
     'note.nightOwl': '0 時から 5 時のあいだに動いた数',
   },
@@ -329,10 +329,10 @@ const MESSAGES = {
 
     // 節をまとめる見出し（ja と同じ 5 つ）
     'group.now': 'Now',
-    'group.self': 'Who they are',
-    'group.power': 'What they can do',
-    'group.events': 'What happened',
-    'group.record': 'The record',
+    'group.self': 'Identity',
+    'group.power': 'Power',
+    'group.events': 'Adventure',
+    'group.record': 'Legacy',
 
     'row.dailyExp': 'EXP today',
     'row.mood': 'Right now',

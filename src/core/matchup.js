@@ -22,9 +22,9 @@ const BEATS = {
 const REASON = {
   artisan: { ja: '組み上がる前に壊す', en: 'breaks it before it is finished' },
   architect: { ja: '読む対象そのものを決める', en: 'decides what there is to read' },
-  scholar: { ja: '中を読み切っていれば、外は要らない', en: 'has read it all already' },
-  seeker: { ja: '知っている者は、指示より速い', en: 'already knew, before the order came' },
-  commander: { ja: '一人で叩くには、数が多すぎる', en: 'brought too many to fight alone' },
+  scholar: { ja: '中を読み切っていれば 外は要らない', en: 'has read it all already' },
+  seeker: { ja: '知っている者は 指示より速い', en: 'already knew, before the order came' },
+  commander: { ja: '一人で叩くには 数が多すぎる', en: 'brought too many to fight alone' },
 };
 
 /**

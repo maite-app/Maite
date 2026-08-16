@@ -217,7 +217,7 @@ export const IMBUES = [
   { id: 'balanced', ja: '釣り合い', en: 'Balanced', blurb: 'どこにも偏らない', blurbEn: 'Nothing leans', spread: { atk: 1, def: 1, spd: 1 } },
   { id: 'wary', ja: '用心', en: 'Wary', blurb: '攻めながら守る', blurbEn: 'Guards while it strikes', spread: { atk: 1, def: 2, spd: 0 } },
   { id: 'restless', ja: '落ち着かなさ', en: 'Restless', blurb: '止まっていられない', blurbEn: 'It will not sit still', spread: { atk: 1, def: 0, spd: 2 } },
-  { id: 'patient', ja: '辛抱', en: 'Patient', blurb: '待って、確かめる', blurbEn: 'Waits, and makes sure', spread: { atk: 0, def: 2, spd: 1 } },
+  { id: 'patient', ja: '辛抱', en: 'Patient', blurb: '待って 確かめる', blurbEn: 'Waits, and makes sure', spread: { atk: 0, def: 2, spd: 1 } },
 
   // 技を 1 段上げる ── 既にある段位の仕組みに乗るだけ
   { id: 'unyielding', ja: '不屈の宿り', en: 'the Unyielding', blurb: '倒れにくくなる', blurbEn: 'Harder to put down', skill: 'fortitude' },
@@ -325,28 +325,28 @@ export function skillBoostOf(find) {
 export const BOSS_EVERY = 25;
 
 export const BOSSES = [
-  { id: 'deadline', ja: '締切の亡霊', en: 'Wraith of the Deadline', blurb: '追いつかれると、何もかも雑になる', blurbEn: 'Catch its eye and everything gets sloppy' },
-  { id: 'flaky', ja: '気まぐれな試験', en: 'The Flaky Suite', blurb: '同じことをして、違う顔をする', blurbEn: 'Same input, different mood' },
-  { id: 'legacy', ja: '触れられぬ古層', en: 'The Untouched Stratum', blurb: '誰も読んでいないが、誰も消せない', blurbEn: 'Nobody reads it, nobody dares delete it' },
-  { id: 'yak', ja: '毛を刈られる獣', en: 'The Shaven Beast', blurb: '刈っても刈っても、その下にまた毛がある', blurbEn: 'Shave it and there is more underneath' },
-  { id: 'heisenbug', ja: '見ると消える虫', en: 'The Vanishing Bug', blurb: '調べようとした瞬間だけ、正しく動く', blurbEn: 'Behaves perfectly the moment you look' },
-  { id: 'merge', ja: '三方向の裂け目', en: 'The Three-Way Rift', blurb: 'どちらを残しても、何かが失われる', blurbEn: 'Keep either side and something is lost' },
-  { id: 'offbyone', ja: '一つずれた門番', en: 'The Off-By-One Gate', blurb: '数え始めをどこにするかで、通れたり通れなかったり', blurbEn: 'Passable or not, depending where you start counting' },
-  { id: 'cascade', ja: '連鎖する赤', en: 'The Cascading Red', blurb: '1 つ直すと、2 つ赤くなる', blurbEn: 'Fix one and two more turn red' },
-  { id: 'silence', ja: '黙って落ちるもの', en: 'The Silent Failure', blurb: '何も言わずに、何もしていない', blurbEn: 'Says nothing, does nothing' },
-  { id: 'scope', ja: 'ふくれ続ける輪郭', en: 'The Ever-Widening Scope', blurb: '終わりに近づくほど、遠ざかる', blurbEn: 'The closer you get, the further it goes' },
-  { id: 'cache', ja: '古いまま笑う鏡', en: 'The Stale Mirror', blurb: '正しく直したのに、直る前の姿を映す', blurbEn: 'You fixed it; it still shows the old you' },
-  { id: 'race', ja: '順番を守らぬもの', en: 'The Out-Of-Order', blurb: '毎回ちがう順で来る。だから再現できない', blurbEn: 'Arrives in a new order each time' },
+  { id: 'deadline', ja: '締切の亡霊', en: 'Wraith of the Deadline', blurb: '追いつかれると 何もかも雑になる', blurbEn: 'Catch its eye and everything gets sloppy' },
+  { id: 'flaky', ja: '気まぐれな試験', en: 'The Flaky Suite', blurb: '同じことをして 違う顔をする', blurbEn: 'Same input, different mood' },
+  { id: 'legacy', ja: '触れられぬ古層', en: 'The Untouched Stratum', blurb: '誰も読んでいないが 誰も消せない', blurbEn: 'Nobody reads it, nobody dares delete it' },
+  { id: 'yak', ja: '毛を刈られる獣', en: 'The Shaven Beast', blurb: '刈っても刈っても その下にまた毛がある', blurbEn: 'Shave it and there is more underneath' },
+  { id: 'heisenbug', ja: '見ると消える虫', en: 'The Vanishing Bug', blurb: '調べようとした瞬間だけ 正しく動く', blurbEn: 'Behaves perfectly the moment you look' },
+  { id: 'merge', ja: '三方向の裂け目', en: 'The Three-Way Rift', blurb: 'どちらを残しても 何かが失われる', blurbEn: 'Keep either side and something is lost' },
+  { id: 'offbyone', ja: '一つずれた門番', en: 'The Off-By-One Gate', blurb: '数え始めをどこにするかで 通れたり通れなかったり', blurbEn: 'Passable or not, depending where you start counting' },
+  { id: 'cascade', ja: '連鎖する赤', en: 'The Cascading Red', blurb: '1 つ直すと 2 つ赤くなる', blurbEn: 'Fix one and two more turn red' },
+  { id: 'silence', ja: '黙って落ちるもの', en: 'The Silent Failure', blurb: '何も言わずに 何もしていない', blurbEn: 'Says nothing, does nothing' },
+  { id: 'scope', ja: 'ふくれ続ける輪郭', en: 'The Ever-Widening Scope', blurb: '終わりに近づくほど 遠ざかる', blurbEn: 'The closer you get, the further it goes' },
+  { id: 'cache', ja: '古いまま笑う鏡', en: 'The Stale Mirror', blurb: '正しく直したのに 直る前の姿を映す', blurbEn: 'You fixed it; it still shows the old you' },
+  { id: 'race', ja: '順番を守らぬもの', en: 'The Out-Of-Order', blurb: '毎回ちがう順で来る　だから再現できない', blurbEn: 'Arrives in a new order each time' },
   // 12 体だと 300 階で一巡してしまう。深く潜る人のぶんを足す
-  { id: 'quota', ja: '枠を配るもの', en: 'The Quota Keeper', blurb: 'あと少しというところで、今日のぶんは終わる', blurbEn: 'Ends your day right before the last step' },
-  { id: 'slop', ja: 'それらしいだけの群れ', en: 'The Plausible Swarm', blurb: '全部それらしく見えるので、どれが嘘か分からない', blurbEn: 'All of it looks right, so you cannot tell which part lied' },
-  { id: 'midnight', ja: '深夜に一言だけ言うもの', en: 'The Midnight Whisper', blurb: 'ひと言で相場が動く。中身は誰にも分からない', blurbEn: 'One line moves the market. Nobody knows what it meant' },
-  { id: 'migration', ja: '終わらない移行', en: 'The Endless Migration', blurb: '新しいほうへ移した先で、また新しいほうが出る', blurbEn: 'You migrate to the new thing; a newer thing appears' },
+  { id: 'quota', ja: '枠を配るもの', en: 'The Quota Keeper', blurb: 'あと少しというところで 今日のぶんは終わる', blurbEn: 'Ends your day right before the last step' },
+  { id: 'slop', ja: 'それらしいだけの群れ', en: 'The Plausible Swarm', blurb: '全部それらしく見えるので どれが嘘か分からない', blurbEn: 'All of it looks right, so you cannot tell which part lied' },
+  { id: 'midnight', ja: '深夜に一言だけ言うもの', en: 'The Midnight Whisper', blurb: 'ひと言で相場が動く　中身は誰にも分からない', blurbEn: 'One line moves the market. Nobody knows what it meant' },
+  { id: 'migration', ja: '終わらない移行', en: 'The Endless Migration', blurb: '新しいほうへ移した先で また新しいほうが出る', blurbEn: 'You migrate to the new thing; a newer thing appears' },
   // 2026 のぶん。**現象のほうを書く**（i18n のテストが名指しを止める）
-  { id: 'handoff', ja: '伝言の果て', en: 'The Long Handoff', blurb: '3 体目に届く頃には、別の話になっている', blurbEn: 'By the third relay it is a different task' },
-  { id: 'washing', ja: '肩書きだけ替わるもの', en: 'The Retitled', blurb: '中身は去年のまま、名前だけ今年になる', blurbEn: 'Same insides, this year\u2019s name' },
-  { id: 'overflow', ja: '溢れさせるもの', en: 'The Overflow', blurb: '溢れると、なぜか大事なほうから落ちる', blurbEn: 'When it spills, the important half goes first' },
-  { id: 'polite', ja: '丁寧に食い違うもの', en: 'The Polite Disagreement', blurb: '全員が丁寧で、誰も同じことを言っていない', blurbEn: 'Everyone is courteous; nobody agrees' },
+  { id: 'handoff', ja: '伝言の果て', en: 'The Long Handoff', blurb: '3 体目に届く頃には 別の話になっている', blurbEn: 'By the third relay it is a different task' },
+  { id: 'washing', ja: '肩書きだけ替わるもの', en: 'The Retitled', blurb: '中身は去年のまま 名前だけ今年になる', blurbEn: 'Same insides, this year\u2019s name' },
+  { id: 'overflow', ja: '溢れさせるもの', en: 'The Overflow', blurb: '溢れると なぜか大事なほうから落ちる', blurbEn: 'When it spills, the important half goes first' },
+  { id: 'polite', ja: '丁寧に食い違うもの', en: 'The Polite Disagreement', blurb: '全員が丁寧で 誰も同じことを言っていない', blurbEn: 'Everyone is courteous; nobody agrees' },
 ];
 
 /** 25 階ごとの主。個体の種と階から決まるので、何度呼んでも同じ。 */

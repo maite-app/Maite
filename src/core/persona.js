@@ -44,8 +44,8 @@ export const WINDOW_DAYS = 14;
 export const AXES = [
   {
     id: 'reach',
-    left: { code: 'in', ja: '籠る', en: 'Inward', blurb: '手元を読んで、自分で叩く', blurbEn: 'Reads what is here and runs it yourself' },
-    right: { code: 'out', ja: '出て行く', en: 'Outward', blurb: '外を調べて、人に任せる', blurbEn: 'Looks outside and hands work over' },
+    left: { code: 'in', ja: '籠る', en: 'Inward', blurb: '手元を読んで 自分で叩く', blurbEn: 'Reads what is here and runs it yourself' },
+    right: { code: 'out', ja: '出て行く', en: 'Outward', blurb: '外を調べて 人に任せる', blurbEn: 'Looks outside and hands work over' },
     from: '調べもの（WebSearch / MCP）と Task の割合',
     fromEn: 'Share of lookups (WebSearch / MCP) and delegated Tasks',
     threshold: 0.12,
@@ -55,9 +55,9 @@ export const AXES = [
   },
   {
     id: 'hand',
-    left: { code: 'move', ja: '動かす', en: 'Run it', blurb: 'まず走らせて、返ってきたもので確かめる', blurbEn: 'Runs it first and learns from what comes back' },
+    left: { code: 'move', ja: '動かす', en: 'Run it', blurb: 'まず走らせて 返ってきたもので確かめる', blurbEn: 'Runs it first and learns from what comes back' },
     right: { code: 'build', ja: '組み立てる', en: 'Build it', blurb: '読んで筋を通してから書く', blurbEn: 'Reads, makes it make sense, then writes' },
-    from: '実行（Bash）と、読み書き（Read / Edit）の比',
+    from: '実行（Bash）と 読み書き（Read / Edit）の比',
     fromEn: 'Running (Bash) against reading and writing (Read / Edit)',
     threshold: 0.66,
     floor: 60,
@@ -74,8 +74,8 @@ export const AXES = [
      * これは人によって桁で変わるし、**そのまま任せ方の癖**になっている。
      */
     id: 'grip',
-    left: { code: 'cut', ja: '刻む', en: 'Step by step', blurb: '細かく区切って、そのつど確かめる', blurbEn: 'Small steps, checked one at a time' },
-    right: { code: 'trust', ja: '委ねる', en: 'Hand it over', blurb: '大きく投げて、走らせておく', blurbEn: 'Throws it big and lets it run' },
+    left: { code: 'cut', ja: '刻む', en: 'Step by step', blurb: '細かく区切って そのつど確かめる', blurbEn: 'Small steps, checked one at a time' },
+    right: { code: 'trust', ja: '委ねる', en: 'Hand it over', blurb: '大きく投げて 走らせておく', blurbEn: 'Throws it big and lets it run' },
     from: 'ひと言の指示で動く道具の数',
     fromEn: 'Tool calls per instruction you give',
     threshold: 0.5,
@@ -86,9 +86,9 @@ export const AXES = [
   },
   {
     id: 'run',
-    left: { code: 'spread', ja: '散らす', en: 'Scattered', blurb: '短いセッションを、あちこちで何本も', blurbEn: 'Many short sessions, all over the place' },
+    left: { code: 'spread', ja: '散らす', en: 'Scattered', blurb: '短いセッションを あちこちで何本も', blurbEn: 'Many short sessions, all over the place' },
     right: { code: 'through', ja: '走り切る', en: 'Sees it through', blurb: '一本のセッションを長く走る', blurbEn: 'One session, run long' },
-    from: 'ひと続きの作業で、どれだけ手を動かすか',
+    from: 'ひと続きの作業で どれだけ手を動かすか',
     fromEn: 'Tool calls per session',
     threshold: 0.5,
     floor: 3,
@@ -220,28 +220,28 @@ function softness(value, half) {
  */
 export const TYPES = {
   // 籠る × 動かす ── 工房にこもって、手を動かす者
-  'in.move.cut.through': { ja: '鍛冶師', yomi: 'かじし', blurb: '一本を、打ち続けて仕上げる', en: 'Smith', blurbEn: 'One blade, hammered until it is finished' },
-  'in.move.cut.spread': { ja: '罠師', yomi: 'わなし', blurb: '仕掛けては次へ、また仕掛ける', en: 'Trapper', blurbEn: 'Sets one, moves on, sets another' },
-  'in.move.trust.through': { ja: '錬金術師', yomi: 'れんきんじゅつし', blurb: '仕込んで、煮えるまで離れない', en: 'Alchemist', blurbEn: 'Starts the brew and never leaves the pot' },
-  'in.move.trust.spread': { ja: '傀儡師', yomi: 'くぐつし', blurb: '作って、動かして、放っておく', en: 'Puppeteer', blurbEn: 'Builds it, winds it up, lets it run' },
+  'in.move.cut.through': { ja: '鍛冶師', yomi: 'かじし', blurb: '一本を 打ち続けて仕上げる', en: 'Smith', blurbEn: 'One blade, hammered until it is finished' },
+  'in.move.cut.spread': { ja: '罠師', yomi: 'わなし', blurb: '仕掛けては次へ また仕掛ける', en: 'Trapper', blurbEn: 'Sets one, moves on, sets another' },
+  'in.move.trust.through': { ja: '錬金術師', yomi: 'れんきんじゅつし', blurb: '仕込んで 煮えるまで離れない', en: 'Alchemist', blurbEn: 'Starts the brew and never leaves the pot' },
+  'in.move.trust.spread': { ja: '傀儡師', yomi: 'くぐつし', blurb: '作って 動かして 放っておく', en: 'Puppeteer', blurbEn: 'Builds it, winds it up, lets it run' },
 
   // 籠る × 組み立てる ── 書庫にこもって、筋を通す者
-  'in.build.cut.through': { ja: '魔道書士', yomi: 'まどうしょし', blurb: '一冊を、最後の行まで書き切る', en: 'Grimoirist', blurbEn: 'One volume, written to the last line' },
-  'in.build.cut.spread': { ja: '呪紋師', yomi: 'じゅもんし', blurb: '気になった紋だけ刻んで、また別の紋へ', en: 'Sigil-carver', blurbEn: 'Cuts the one glyph that caught the eye, then another' },
-  'in.build.trust.through': { ja: '結界師', yomi: 'けっかいし', blurb: '張ってしまえば、あとは守り続ける', en: 'Warder', blurbEn: 'Once the ward is up, it is kept up' },
-  'in.build.trust.spread': { ja: '幻術師', yomi: 'げんじゅつし', blurb: '思いつくたびに、形が変わる', en: 'Illusionist', blurbEn: 'Changes shape with every new idea' },
+  'in.build.cut.through': { ja: '魔道書士', yomi: 'まどうしょし', blurb: '一冊を 最後の行まで書き切る', en: 'Grimoirist', blurbEn: 'One volume, written to the last line' },
+  'in.build.cut.spread': { ja: '呪紋師', yomi: 'じゅもんし', blurb: '気になった紋だけ刻んで また別の紋へ', en: 'Sigil-carver', blurbEn: 'Cuts the one glyph that caught the eye, then another' },
+  'in.build.trust.through': { ja: '結界師', yomi: 'けっかいし', blurb: '張ってしまえば あとは守り続ける', en: 'Warder', blurbEn: 'Once the ward is up, it is kept up' },
+  'in.build.trust.spread': { ja: '幻術師', yomi: 'げんじゅつし', blurb: '思いつくたびに 形が変わる', en: 'Illusionist', blurbEn: 'Changes shape with every new idea' },
 
   // 出て行く × 動かす ── 野に出て、体で確かめる者
-  'out.move.cut.through': { ja: '竜騎士', yomi: 'りゅうきし', blurb: '踏み込んだら、決着まで降りない', en: 'Dragoon', blurbEn: 'Once committed, never dismounts' },
-  'out.move.cut.spread': { ja: '狩人', yomi: 'かりうど', blurb: '見つけて、仕留めて、すぐ次の獲物へ', en: 'Hunter', blurbEn: 'Finds it, takes it, moves to the next' },
-  'out.move.trust.through': { ja: '獣使い', yomi: 'けものつかい', blurb: '連れて行って、任せて、着くまで見ている', en: 'Beastmaster', blurbEn: 'Brings them along, lets them work, sees it through' },
-  'out.move.trust.spread': { ja: '傭兵', yomi: 'ようへい', blurb: '風の向いたところで、風の向くだけ', en: 'Sellsword', blurbEn: 'Wherever the wind blows, for as long as it blows' },
+  'out.move.cut.through': { ja: '竜騎士', yomi: 'りゅうきし', blurb: '踏み込んだら 決着まで降りない', en: 'Dragoon', blurbEn: 'Once committed, never dismounts' },
+  'out.move.cut.spread': { ja: '狩人', yomi: 'かりうど', blurb: '見つけて 仕留めて すぐ次の獲物へ', en: 'Hunter', blurbEn: 'Finds it, takes it, moves to the next' },
+  'out.move.trust.through': { ja: '獣使い', yomi: 'けものつかい', blurb: '連れて行って 任せて 着くまで見ている', en: 'Beastmaster', blurbEn: 'Brings them along, lets them work, sees it through' },
+  'out.move.trust.spread': { ja: '傭兵', yomi: 'ようへい', blurb: '風の向いたところで 風の向くだけ', en: 'Sellsword', blurbEn: 'Wherever the wind blows, for as long as it blows' },
 
   // 出て行く × 組み立てる ── 外を見て、絵を描く者
-  'out.build.cut.through': { ja: '占星術師', yomi: 'せんせいじゅつし', blurb: '空を測って、暦を引き切る', en: 'Astrologer', blurbEn: 'Measures the sky and finishes the chart' },
-  'out.build.cut.spread': { ja: '吟遊詩人', yomi: 'ぎんゆうしじん', blurb: '見聞きしたぶんだけ、歌に足していく', en: 'Bard', blurbEn: 'Adds a verse for everything seen and heard' },
-  'out.build.trust.through': { ja: '導師', yomi: 'どうし', blurb: '大きく示して、着くまで連れて行く', en: 'Wayfinder', blurbEn: 'Points at the far thing and walks you to it' },
-  'out.build.trust.spread': { ja: '精霊使い', yomi: 'せいれいつかい', blurb: '呼んでは任せ、気の向く先へ流れる', en: 'Spiritcaller', blurbEn: 'Calls, hands it over, drifts where it goes' },
+  'out.build.cut.through': { ja: '占星術師', yomi: 'せんせいじゅつし', blurb: '空を測って 暦を引き切る', en: 'Astrologer', blurbEn: 'Measures the sky and finishes the chart' },
+  'out.build.cut.spread': { ja: '吟遊詩人', yomi: 'ぎんゆうしじん', blurb: '見聞きしたぶんだけ 歌に足していく', en: 'Bard', blurbEn: 'Adds a verse for everything seen and heard' },
+  'out.build.trust.through': { ja: '導師', yomi: 'どうし', blurb: '大きく示して 着くまで連れて行く', en: 'Wayfinder', blurbEn: 'Points at the far thing and walks you to it' },
+  'out.build.trust.spread': { ja: '精霊使い', yomi: 'せいれいつかい', blurb: '呼んでは任せ 気の向く先へ流れる', en: 'Spiritcaller', blurbEn: 'Calls, hands it over, drifts where it goes' },
 };
 
 /**

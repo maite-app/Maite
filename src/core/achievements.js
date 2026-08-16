@@ -34,7 +34,7 @@ export const ACHIEVEMENTS = {
   },
   phoenix: {
     en: 'Phoenix', ja: '不死鳥',
-    blurbEn: 'Fixed a failing tool on the spot', blurb: '失敗したツールを、その場で成功させ直した',
+    blurbEn: 'Fixed a failing tool on the spot', blurb: '失敗したツールを その場で成功させ直した',
     test: (s) => s.traits.comebacks >= 1,
   },
   longHaul: {
@@ -146,28 +146,28 @@ export const ACHIEVEMENTS = {
    */
   mistakesWereMade: {
     en: 'Mistakes Were Made', ja: 'やらかし',
-    blurbEn: '100 tool calls came back with nothing', blurb: '100 回、道具が空を切った',
+    blurbEn: '100 tool calls came back with nothing', blurb: '100 回 道具が空を切った',
     rough: true,
     test: (s) => s.traits.failures >= 100,
   },
   emptySwings: {
     en: 'A Thousand Empty Swings', ja: '空振り千本',
     blurbEn: '1,000 tool calls came back with nothing — and you kept going',
-    blurb: '1,000 回空を切って、それでも手を止めなかった',
+    blurb: '1,000 回空を切って それでも手を止めなかった',
     rough: true,
     test: (s) => s.traits.failures >= 1000,
   },
   overtime: {
     en: 'Called It A Day', ja: '働きすぎ',
     blurbEn: 'Hit the daily cap. That is enough for one day',
-    blurb: 'ひと日の上限まで稼いだ。もう休んでいい',
+    blurb: 'ひと日の上限まで稼いだ　もう休んでいい',
     rough: true,
     test: (s, ctx) => Boolean(ctx.dailyCap) && s.daily.exp >= ctx.dailyCap,
   },
   theLongWayRound: {
     en: 'The Long Way Round', ja: '遠回り',
     blurbEn: 'More swings missed than caught, 300 times over',
-    blurb: '立て直した数より、空を切った数のほうが多いまま 300 回を越えた',
+    blurb: '立て直した数より 空を切った数のほうが多いまま 300 回を越えた',
     rough: true,
     test: (s) => s.traits.failures >= 300 && s.traits.failures > s.traits.comebacks,
   },
