@@ -13,7 +13,11 @@ Work on your laptop, work in Claude Code on the web — stand up the server and 
 
 **日本語 → [README.md](README.md)**
 
-![Maite](docs/preview.png)
+![Maite](site/shots/card.png)
+
+<img src="site/shots/overlay.png" alt="The overlay, actual size, in the corner of the screen" width="200">
+
+*Actual size. That is the whole of it, bottom-right of your screen, until you go looking for the detail.*
 
 ## Privacy
 
@@ -66,11 +70,11 @@ Five classes:
 
 | Class | Tools that feed it |
 |---|---|
-| Artisan | `Bash` |
+| Artisan | `Bash` `BashOutput` `KillShell` |
 | Seeker | `WebSearch` `WebFetch` `mcp__*` |
-| Builder | `Write` `Edit` |
+| Architect | `Write` `Edit` `NotebookEdit` |
 | Scholar | `Read` `Grep` `Glob` |
-| Commander | `Task` |
+| Commander | `Task` `Agent` `Workflow` |
 
 Antenna at Lv3, crown at Lv10, aura at Lv15. Until a class settles it stays colourless; the moment it does, colour arrives.
 
@@ -87,7 +91,7 @@ Antenna at Lv3, crown at Lv10, aura at Lv15. Until a class settles it stays colo
 
 **Not one character of what you typed is read.** It only looks at *how* you use it — which is why you can drop the hook into any repository and it still works.
 
-<img src="docs/persona.png" alt="Where the name comes from, and the four axes" width="360">
+<img src="site/shots/name.png" alt="Where the name comes from, and the four axes" width="360">
 
 **The evidence sits next to every axis.** "You are an X type" on its own is a horoscope; with the measurement beside it, even a wrong read lands as "well, yes, that is what it would look like".
 
@@ -171,7 +175,7 @@ AIPET_SERVE=7777 npm start   # macOS / Linux
 - **Read-only.** There is no endpoint that writes
 - **No authentication.** Anyone on that Wi-Fi can see it. It's levels, classes and counters (prompts and paths were never stored), but **don't run this on public Wi-Fi**
 
-<img src="docs/mobile.png" alt="The dashboard on a phone" width="320">
+<img src="site/shots/home.png" alt="The dashboard on a phone" width="320">
 
 ### From anywhere (and counting your cloud work)
 
