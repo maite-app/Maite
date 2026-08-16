@@ -1,0 +1,2566 @@
+/* オーバーレイなので背景は必ず完全透明。body に色を置いた瞬間に四角が見える。 */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+}
+
+#stage {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  /* 系統が決まるまでは無彩色寄り。決まると色がつく。 */
+  --hue: 220;
+  --sat: 12%;
+  --body: hsl(var(--hue) var(--sat) 62%);
+  --body-dark: hsl(var(--hue) var(--sat) 46%);
+  --ink: hsl(var(--hue) 30% 18%);
+  --scale: 1;
+}
+
+#pet {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 拡大の基点は足元。上に伸びるので、レベルが上がっても接地位置がぶれない。 */
+#creature {
+  transform-origin: 100px 166px;
+  transform: scale(var(--scale));
+  animation: bob 2.8s ease-in-out infinite;
+}
+
+#body {
+  fill: var(--body);
+  stroke: var(--body-dark);
+  stroke-width: 3;
+  filter: drop-shadow(0 4px 10px hsl(var(--hue) 40% 20% / 0.35));
+}
+
+#shadow {
+  fill: hsl(0 0% 0% / 0.22);
+  filter: blur(3px);
+}
+
+.eyeball {
+  fill: #fff;
+}
+
+/*
+ * 瞳の光。**これ 1 個で顔つきが変わる** ── 真っ黒のままだと、どれだけ形を
+ * 丸くしても「点」にしか見えない。
+ */
+.glint {
+  fill: #fff;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+/*
+ * 頬の赤み。**系統色に寄せる**ので、系統が決まるまではほとんど出ない
+ * （無彩色の子に頬紅だけ乗ると浮く）。顔の形には触らない ── 目つきと
+ * 口元は型が決めるもの（DESIGN.md §8c）。
+ */
+#blush ellipse {
+  fill: hsl(var(--hue) var(--sat) 48%);
+  opacity: 0.3;
+}
+.pupil {
+  fill: var(--ink);
+  transition: transform 0.18s ease-out;
+}
+.lid {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+#mouth {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+#antenna path {
+  fill: none;
+  stroke: var(--body-dark);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+#antenna circle {
+  fill: var(--body-dark);
+}
+#antenna,
+#crown,
+#aura {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+#stage.has-antenna #antenna,
+#stage.has-crown #crown,
+#stage.has-aura #aura {
+  opacity: 1;
+}
+
+#crown path {
+  fill: hsl(45 90% 60%);
+  stroke: hsl(38 70% 38%);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+/*
+ * オーラは体の奥に回る。**胴体と一緒に大きくする** ── 前は `#creature` の外に
+ * あるせいで拡大に付いてこず、そのぶん「どの大きさでも body の外に出る」
+ * 半径（74x58）で描いてあった。結果、**Lv が上がるほど上は body に食い込み、
+ * 横と下だけ大きく空く**（スマホだと 200px の枠いっぱいの輪っかになって、
+ * 相棒より輪のほうが目立っていた）。
+ *
+ * 拡大は「まとまり」に、回転は「楕円」に掛ける ── transform は 1 つしか
+ * 持てないので、同じ要素に両方書くと後から当たったほうだけが残る。
+ */
+#aura {
+  transform-origin: 100px 166px; /* creature と同じ足元 */
+  transform: scale(var(--scale));
+}
+
+#aura ellipse {
+  fill: none;
+  stroke: var(--body);
+  stroke-width: 2;
+  stroke-dasharray: 6 14;
+  transform-origin: 100px 122px;
+  animation: spin 9s linear infinite;
+  opacity: 0.55;
+}
+
+/*
+ * **点線の輪は 1 本だけ。** 守りの装備（ward）も点線の輪を 2 本回すので、
+ * オーラと同時に出ると輪が 3 本重なって、相棒より輪のほうが大きく見える
+ * ── スマホだと 200px の枠が丸ごと輪で埋まっていた。装備のほうが
+ * 「なぜ出ているか」を説明できるので、素のオーラを引っ込める。
+ */
+#stage.gw-def-ward #aura {
+  opacity: 0;
+}
+
+/* ---- 吹き出し ----
+   真上ではなく左上に置く。真上だと冠や触角と必ずぶつかる。 */
+#bubble {
+  position: absolute;
+  top: 8px;
+  left: 6px;
+  transform-origin: bottom left;
+  transform: scale(0.7);
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: hsl(0 0% 100% / 0.92);
+  color: hsl(220 20% 22%);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 10px hsl(220 40% 20% / 0.28);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+#stage.show-bubble #bubble {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 実績とレベルアップの瞬間だけ。系統色で光らせて、数秒で普通の吹き出しに戻る。 */
+#stage.bubble-loud #bubble {
+  background: var(--body);
+  color: hsl(var(--hue) 40% 14%);
+  box-shadow: 0 0 14px hsl(var(--hue) 80% 60% / 0.55);
+}
+
+/* ---- レベル表示 ---- */
+#badge {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: hsl(0 0% 100% / 0.92);
+  text-shadow: 0 1px 3px hsl(0 0% 0% / 0.65);
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+#stage.mood-working #badge,
+#stage.mood-calling #badge {
+  opacity: 1;
+}
+
+#bar {
+  width: 46px;
+  height: 4px;
+  border-radius: 2px;
+  background: hsl(0 0% 100% / 0.28);
+  overflow: hidden;
+}
+#bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: var(--body);
+  transition: width 0.5s ease;
+}
+
+/* ---- 気分ごとの動き ---- */
+/*
+ * 浮き沈み。**上下だけだと「動いている絵」で、生き物には見えない。**
+ * 沈んだところで少し潰れて、上がりきったところで少し伸びる（squash &
+ * stretch）── 幅と高さを 1.5% 動かすだけで、同じ動きが呼吸に見える。
+ */
+@keyframes bob {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) scale(1.015, 0.985);
+  }
+  50% {
+    transform: scale(var(--scale)) translateY(-4px) scale(0.99, 1.01);
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  30% {
+    transform: scale(var(--scale)) translateY(-14px);
+  }
+  55% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.92);
+  }
+  75% {
+    transform: scale(var(--scale)) translateY(-4px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(var(--scale)) scaleY(0.94) translateY(6px);
+  }
+  50% {
+    transform: scale(var(--scale)) scaleY(0.99) translateY(4px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#stage.mood-working #creature {
+  animation: hop 0.62s ease-in-out infinite;
+}
+#stage.mood-thinking #creature {
+  animation: bob 1.5s ease-in-out infinite;
+}
+#stage.mood-calling #creature {
+  animation: hop 0.9s ease-in-out infinite;
+}
+#stage.mood-sleeping #creature {
+  animation: breathe 4.2s ease-in-out infinite;
+}
+/* 寝ているときは目を閉じる */
+#stage.mood-sleeping .lid {
+  opacity: 1;
+}
+#stage.mood-sleeping .pupil,
+#stage.mood-sleeping .eyeball,
+#stage.mood-sleeping .glint {
+  opacity: 0;
+}
+#stage.mood-sleeping #badge {
+  opacity: 0.2;
+}
+
+/* ── リズム（persona.js の 5 軸目）で息づかいの速さが変わる ─────────
+   凪 はゆったり、波 はせかせか。**気分の指定より後ろ・しぐさより前に置く**
+   ── 気分が決めた動き方の「速さだけ」を上書きして、しぐさの最中は
+   しぐさ側の指定（animation の一括指定）がまるごと勝つ。 */
+#stage.r-calm #creature {
+  animation-duration: 3.6s;
+}
+#stage.r-wave #creature {
+  animation-duration: 1.9s;
+}
+
+/* まばたき */
+#stage.blink .lid {
+  opacity: 1;
+}
+#stage.blink .pupil,
+#stage.blink .eyeball,
+#stage.blink .glint {
+  opacity: 0;
+}
+
+/* ---- 使い込み ------------------------------------------------------
+   **一緒にいた長さが、そのまま傷になる。** 性能には 1 も効かない ──
+   歴戦の証であって、罰ではない（放置で弱らせない。DESIGN.md §3）。 */
+
+#patina .scar,
+#patina .chip {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+#patina .scar {
+  fill: none;
+  stroke: var(--body-dark);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+#patina .chip {
+  fill: hsl(var(--hue) var(--sat) 40%);
+}
+
+/* 30 日 ── 使い込まれてきた */
+#stage.pt-1 #scar-1,
+#stage.pt-2 #scar-1,
+#stage.pt-3 #scar-1 {
+  opacity: 0.45;
+}
+
+/* 120 日 ── 年季が入った */
+#stage.pt-2 #scar-2,
+#stage.pt-3 #scar-2,
+#stage.pt-2 #scar-3,
+#stage.pt-3 #scar-3 {
+  opacity: 0.4;
+}
+
+/* 1 年 ── 満身創痍。縁も少し欠ける */
+#stage.pt-3 #scar-4,
+#stage.pt-3 #scar-5 {
+  opacity: 0.35;
+}
+#stage.pt-3 #chip-1,
+#stage.pt-3 #chip-2 {
+  opacity: 0.8;
+}
+
+/*
+ * 装備も一緒に古びる。**光沢だけ落として、色と大きさは変えない**
+ * ── 弱くなったように見せない（実際に弱くなっていない）。
+ */
+#stage.pt-2 #gear .gear-atk .edge,
+#stage.pt-2 #gear .gear-def .plate {
+  filter: saturate(0.85);
+}
+#stage.pt-3 #gear .gear-atk .edge,
+#stage.pt-3 #gear .gear-def .plate {
+  filter: saturate(0.7);
+  stroke-dasharray: 22 3;
+}
+
+/* ---- 顔まわりの小物 -------------------------------------------------
+   **どれも作業ログから生えている**（買えるスキンとは出どころが違うので、
+   顔に掛かってよい。DESIGN.md §8c）。既定では全部消えている。 */
+
+#wear .worn {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#stage.ac-stubble #ac-stubble,
+#stage.ac-moustache #ac-moustache,
+#stage.ac-beard #ac-beard,
+#stage.ac-glasses #ac-glasses,
+#stage.ac-shades #ac-shades,
+#stage.ac-headphones #ac-headphones,
+#stage.ac-scarf #ac-scarf,
+#stage.ac-bandage #ac-bandage,
+#stage.ac-earring #ac-earring {
+  opacity: 1;
+}
+
+/* ひげは体より少し濃いだけ。別の色を置くと、貼り付けたように見える */
+#wear .hair {
+  fill: var(--body-dark);
+  opacity: 0.85;
+}
+
+#wear .rim {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/*
+ * サングラスは**中を透かさない。掛けている間は目を消す。**
+ *
+ * 前は 0.72 で透かしていた（目つきは型が決めるものなので、塗り潰すと
+ * この子が誰なのか顔から消える、という理屈）。**が、実際に描くと汚かった**
+ * ── レンズは角の立った形、目は半径 9 の丸なので、下と横から白目と瞳が
+ * はみ出して、掛けそこねているようにしか見えない。大きさを合わせにいっても
+ * 丸と角では必ずどこかが出る。
+ *
+ * 消すのは `.eye` の**まとまりごと**。中の `.eyeball` / `.pupil` を個別に
+ * 消す書き方（まばたき・寝るときと同じ）にすると、しぐさのアニメーションが
+ * 後から opacity を戻してきて、サングラスの下で目が動く。
+ */
+#stage.ac-shades #face .eye {
+  opacity: 0;
+}
+
+#wear #ac-shades .lens {
+  fill: hsl(var(--hue) 28% 11%);
+}
+
+/* 斜めの光。無いと、顔に黒い穴が 2 つ空いているように見える（`.glint` と同じ） */
+#wear #ac-shades .shine {
+  fill: #fff;
+  opacity: 0.14;
+}
+
+#wear #ac-headphones .band {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+#wear #ac-headphones .cup {
+  fill: var(--ink);
+}
+
+#wear #ac-scarf .cloth {
+  fill: hsl(var(--hue) 45% 46%);
+  stroke: hsl(var(--hue) 45% 34%);
+  stroke-width: 2;
+}
+
+#wear #ac-bandage .patch {
+  fill: #f2e9dc;
+  stroke: #cbbfae;
+  stroke-width: 1.5;
+}
+
+/* ---- ケガ ----------------------------------------------------------
+   **直前の一戦に負けたときだけ、1 時間。**（appearance.js の hurtFor）
+
+   何もしなくても勝手に治る ── 手当てのボタンは無いし、そのあいだ
+   弱ってもいない（数字には 1 も効かない）。世話をさせないための線。 */
+
+#hurt .wound {
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+#stage.hurt-2 #hurt-deep,
+#stage.hurt-1 #hurt-mild {
+  opacity: 1;
+}
+
+#hurt .plaster {
+  fill: #f2e9dc;
+  stroke: #cbbfae;
+  stroke-width: 1.5;
+}
+#hurt .plaster-cross {
+  fill: none;
+  stroke: #cbbfae;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+/* 擦り傷。使い込みの古傷（#patina）より赤みを持たせて、別物だと分かるように */
+#hurt .graze {
+  fill: none;
+  stroke: hsl(6 55% 52%);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+#wear #ac-earring .stud {
+  fill: hsl(45 80% 62%);
+}
+#wear #ac-earring .wire {
+  fill: none;
+  stroke: hsl(45 60% 52%);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* ---- 装備と、育ちの段 ------------------------------------------------
+   **既定では全部消えている。** appearance.js が付けたクラスに当たったものだけ出る。
+   絵を増やさずに数を出すための重ね方は pet-svg.js の見出しに書いてある。
+
+   色は**位**（コモン〜レジェンド）で決める。系統色（--hue）には寄せない
+   ── 寄せると、位の色が人によって別物になる（スマホ側と同じ決まり）。 */
+
+#gear .gear-atk,
+#gear .gear-def,
+#gear .gear-spd,
+#growth .grow {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* 位ごとの色。0〜4 で明るくなる */
+#stage {
+  --gear-atk: 210 8% 62%;
+  --gear-def: 210 8% 62%;
+  --gear-spd: 210 8% 62%;
+}
+#stage.gr-atk-uncommon {
+  --gear-atk: 145 45% 60%;
+}
+#stage.gr-atk-rare {
+  --gear-atk: 210 70% 66%;
+}
+#stage.gr-atk-mystic {
+  --gear-atk: 285 62% 70%;
+}
+#stage.gr-atk-legend {
+  --gear-atk: 42 85% 62%;
+}
+#stage.gr-def-uncommon {
+  --gear-def: 145 45% 60%;
+}
+#stage.gr-def-rare {
+  --gear-def: 210 70% 66%;
+}
+#stage.gr-def-mystic {
+  --gear-def: 285 62% 70%;
+}
+#stage.gr-def-legend {
+  --gear-def: 42 85% 62%;
+}
+#stage.gr-spd-uncommon {
+  --gear-spd: 145 45% 60%;
+}
+#stage.gr-spd-rare {
+  --gear-spd: 210 70% 66%;
+}
+#stage.gr-spd-mystic {
+  --gear-spd: 285 62% 70%;
+}
+#stage.gr-spd-legend {
+  --gear-spd: 42 85% 62%;
+}
+
+/* 出す ── 持っている型のものだけ */
+#stage.gw-atk-blade #gw-blade,
+#stage.gw-atk-axe #gw-axe,
+#stage.gw-atk-hammer #gw-hammer,
+#stage.gw-atk-lance #gw-lance,
+#stage.gw-atk-bow #gw-bow,
+#stage.gw-atk-whip #gw-whip,
+#stage.gw-def-shield #gw-shield,
+#stage.gw-def-plate #gw-plate,
+#stage.gw-def-cloak #gw-cloak,
+#stage.gw-def-helm #gw-helm,
+#stage.gw-def-ward #gw-ward,
+#stage.gw-spd-dash #gw-dash,
+#stage.gw-spd-wing #gw-wing,
+#stage.gw-spd-orb #gw-orb,
+#stage.gw-spd-lens #gw-lens {
+  opacity: 1;
+}
+
+#gear .gear-atk .edge {
+  fill: hsl(var(--gear-atk));
+  stroke: hsl(var(--gear-atk) / 0.5);
+  stroke-width: 2;
+}
+#gear .gear-atk .grip,
+#gear .gear-atk .guard {
+  fill: none;
+  stroke: hsl(var(--gear-atk) / 0.85);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+#gear #gw-bow .edge,
+#gear #gw-whip .edge {
+  fill: none;
+  stroke: hsl(var(--gear-atk));
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+#gear #gw-bow .grip {
+  stroke-width: 2;
+  stroke: hsl(var(--gear-atk) / 0.6);
+}
+
+#gear .gear-def .plate {
+  fill: hsl(var(--gear-def) / 0.85);
+  stroke: hsl(var(--gear-def) / 0.6);
+  stroke-width: 2.5;
+}
+#gear .gear-def .trim {
+  fill: none;
+  stroke: hsl(var(--gear-def) / 0.55);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+#gear #gw-ward .ring,
+#gear #gw-ward .ring2 {
+  fill: none;
+  stroke: hsl(var(--gear-def) / 0.5);
+  stroke-width: 2;
+  stroke-dasharray: 6 8;
+  animation: ward-turn 22s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+#gear #gw-ward .ring2 {
+  stroke-dasharray: 3 12;
+  animation-duration: 34s;
+  animation-direction: reverse;
+}
+
+@keyframes ward-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 置いていった風の筋。手前ほど濃く、後ろほど薄い */
+#gear .gear-spd .streak {
+  fill: none;
+  stroke: hsl(var(--gear-spd) / 0.75);
+  stroke-width: 4;
+  stroke-linecap: round;
+  animation: streak-run 1.6s ease-in-out infinite;
+}
+#gear .gear-spd .streak:nth-child(2) {
+  animation-delay: -0.35s;
+  opacity: 0.8;
+}
+#gear .gear-spd .streak:nth-child(3) {
+  animation-delay: -0.7s;
+  opacity: 0.6;
+}
+
+@keyframes streak-run {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateX(-7px);
+    opacity: 0.9;
+  }
+}
+#gear .gear-spd .feather {
+  fill: hsl(var(--gear-spd) / 0.55);
+  stroke: hsl(var(--gear-spd) / 0.7);
+  stroke-width: 2;
+}
+#gear .gear-spd .orb,
+#gear .gear-spd .orb2 {
+  fill: hsl(var(--gear-spd) / 0.9);
+  animation: orb-drift 4.5s ease-in-out infinite;
+}
+#gear .gear-spd .orb2 {
+  animation-delay: -2.2s;
+}
+#gear #gw-lens .glass {
+  fill: hsl(var(--gear-spd) / 0.25);
+  stroke: hsl(var(--gear-spd));
+  stroke-width: 3;
+}
+#gear #gw-lens .grip {
+  fill: none;
+  stroke: hsl(var(--gear-spd));
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+@keyframes orb-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* 育ちの段。**節目は実績と同じ位置**（Lv30 熟練で角、Lv50 達人で尾…） */
+#stage.lk-horns #lk-horns,
+#stage.lk-tail #lk-tail,
+#stage.lk-halo #lk-halo,
+#stage.lk-sigil #lk-sigil {
+  opacity: 1;
+}
+
+#growth #lk-horns path {
+  fill: var(--body-dark);
+}
+#growth #lk-tail path {
+  fill: none;
+  stroke: var(--body-dark);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+#growth #lk-halo ellipse {
+  fill: none;
+  stroke: hsl(var(--hue) 60% 60% / 0.3);
+  stroke-width: 2;
+  stroke-dasharray: 2 10;
+  animation: ward-turn 40s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+#growth #lk-sigil path {
+  fill: hsl(45 85% 66%);
+  animation: sigil-pulse 3.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes sigil-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+/* Lv100 から浮く。接地の影も小さくする */
+#stage.lk-float #creature {
+  animation: float-idle 4s ease-in-out infinite;
+}
+#stage.lk-float #shadow {
+  transform: scale(0.82);
+  transform-origin: 100px 168px;
+  opacity: 0.7;
+}
+
+@keyframes float-idle {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(-4px);
+  }
+  50% {
+    transform: scale(var(--scale)) translateY(-11px);
+  }
+}
+
+/* ---- しぐさ ----
+   ときどき勝手に動く。どれを出すかは shared/gestures.js が決める。
+
+   気分のアニメーションと同じ #creature を奪うので、**必ず気分の指定より後ろに置く**
+   （詰まるところ後勝ちで上書きしている。特異度は同じ）。
+   どのキーフレームも scale(var(--scale)) から書き始めること ── 抜くと、
+   しぐさに入った瞬間にレベルぶんの大きさが飛ぶ。 */
+
+@keyframes g-stretch {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  35% {
+    transform: scale(var(--scale)) translateY(2px) scaleY(0.88) scaleX(1.06);
+  }
+  70% {
+    transform: scale(var(--scale)) translateY(-10px) scaleY(1.14) scaleX(0.94);
+  }
+}
+
+@keyframes g-tilt {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  30% {
+    transform: scale(var(--scale)) rotate(-9deg);
+  }
+  65% {
+    transform: scale(var(--scale)) rotate(7deg);
+  }
+}
+
+@keyframes g-bounce {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  15% {
+    transform: scale(var(--scale)) translateY(-16px);
+  }
+  35% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.9);
+  }
+  55% {
+    transform: scale(var(--scale)) translateY(-12px);
+  }
+  75% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.94);
+  }
+}
+
+/* rotateY だと横幅がゼロを通るので、平たくして戻すだけで「回った」に見える */
+@keyframes g-spin {
+  0%,
+  100% {
+    transform: scale(var(--scale)) scaleX(1);
+  }
+  50% {
+    transform: scale(var(--scale)) scaleX(-0.15) translateY(-4px);
+  }
+}
+
+@keyframes g-shiver {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateX(0);
+  }
+  20% {
+    transform: scale(var(--scale)) translateX(-3px);
+  }
+  45% {
+    transform: scale(var(--scale)) translateX(3px);
+  }
+  70% {
+    transform: scale(var(--scale)) translateX(-2px);
+  }
+}
+
+/* 寝返り。転がってから、少しだけ位置がずれて落ち着く */
+@keyframes g-roll {
+  0% {
+    transform: scale(var(--scale)) scaleY(0.94) translateY(6px) rotate(0deg);
+  }
+  45% {
+    transform: scale(var(--scale)) scaleY(0.9) translateY(8px) rotate(-12deg);
+  }
+  100% {
+    transform: scale(var(--scale)) scaleY(0.94) translateY(6px) rotate(0deg);
+  }
+}
+
+@keyframes g-yawn {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  40% {
+    transform: scale(var(--scale)) translateY(-4px) scaleY(1.06);
+  }
+}
+
+/* レベルアップと実績。跳ねてから胸を張る */
+@keyframes g-levelup {
+  0% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  20% {
+    transform: scale(var(--scale)) translateY(4px) scaleY(0.85);
+  }
+  45% {
+    transform: scale(var(--scale)) translateY(-26px) scaleY(1.12);
+  }
+  70% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.94);
+  }
+  85% {
+    transform: scale(var(--scale)) translateY(-8px);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+}
+
+/* 戦闘。構える → 2 回踏み込む → 勝った日は跳ね、負けた日はよろける */
+@keyframes g-battle-win {
+  0%,
+  8% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  16% {
+    transform: scale(var(--scale)) translateY(6px) scaleY(0.86);
+  }
+  26% {
+    transform: scale(var(--scale)) translateX(18px) rotate(6deg);
+  }
+  36% {
+    transform: scale(var(--scale)) translateX(-4px);
+  }
+  48% {
+    transform: scale(var(--scale)) translateX(20px) rotate(8deg);
+  }
+  58% {
+    transform: scale(var(--scale)) translateX(0);
+  }
+  72% {
+    transform: scale(var(--scale)) translateY(-24px);
+  }
+  84% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.92);
+  }
+  92% {
+    transform: scale(var(--scale)) translateY(-10px);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+}
+
+@keyframes g-battle-lose {
+  0%,
+  8% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  16% {
+    transform: scale(var(--scale)) translateY(6px) scaleY(0.86);
+  }
+  26% {
+    transform: scale(var(--scale)) translateX(16px) rotate(5deg);
+  }
+  38% {
+    transform: scale(var(--scale)) translateX(-2px);
+  }
+  50% {
+    transform: scale(var(--scale)) translateX(-16px) rotate(-10deg);
+  }
+  62% {
+    transform: scale(var(--scale)) translateX(6px) rotate(4deg);
+  }
+  76% {
+    transform: scale(var(--scale)) translateX(-6px) rotate(-6deg);
+  }
+  90% {
+    transform: scale(var(--scale)) translateY(4px) scaleY(0.9);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+}
+
+/* のぞきこむ。手前に倒しながら少し大きく ── 画面のこちら側を見にくる */
+@keyframes g-peek {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) rotate(0deg);
+  }
+  30% {
+    transform: scale(calc(var(--scale) * 1.06)) translateY(6px) rotate(-4deg);
+  }
+  70% {
+    transform: scale(calc(var(--scale) * 1.06)) translateY(6px) rotate(4deg);
+  }
+}
+
+/* 考えこむ。ゆっくり首をひねって、そのまま止まる時間を作る
+   ── 動き続けるより、止まっているほうが「考えている」に見える */
+@keyframes g-ponder {
+  0% {
+    transform: scale(var(--scale)) rotate(0deg) translateY(0);
+  }
+  20%,
+  60% {
+    transform: scale(var(--scale)) rotate(-12deg) translateY(-3px);
+  }
+  80% {
+    transform: scale(var(--scale)) rotate(6deg) translateY(0);
+  }
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateY(0);
+  }
+}
+
+/* 手が動いている。小刻みに 4 回、同じ間隔で ── 打鍵のリズム */
+@keyframes g-typing {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) rotate(0deg);
+  }
+  12% {
+    transform: scale(var(--scale)) translateY(-5px) rotate(-2deg);
+  }
+  25% {
+    transform: scale(var(--scale)) translateY(0) rotate(2deg);
+  }
+  37% {
+    transform: scale(var(--scale)) translateY(-5px) rotate(2deg);
+  }
+  50% {
+    transform: scale(var(--scale)) translateY(0) rotate(-2deg);
+  }
+  62% {
+    transform: scale(var(--scale)) translateY(-5px) rotate(-2deg);
+  }
+  75% {
+    transform: scale(var(--scale)) translateY(0) rotate(2deg);
+  }
+  87% {
+    transform: scale(var(--scale)) translateY(-4px) rotate(0deg);
+  }
+}
+
+/* 寝ながら浮かぶ。ゆっくり大きく、息をしているだけに見える速さで */
+@keyframes g-dream {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: scale(calc(var(--scale) * 1.03)) translateY(-9px) rotate(-3deg);
+  }
+  70% {
+    transform: scale(var(--scale)) translateY(-4px) rotate(2deg);
+  }
+}
+
+/* くしゃみ。ためて、はじける。速いので目と口も一緒に動かさないと気づけない */
+@keyframes g-sneeze {
+  0% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  35% {
+    transform: scale(calc(var(--scale) * 0.94)) translateY(4px) scaleY(0.9);
+  }
+  50% {
+    transform: scale(calc(var(--scale) * 1.08)) translateY(-8px) scaleY(1.1);
+  }
+  65% {
+    transform: scale(var(--scale)) translateY(2px);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+}
+
+#stage.g-look #creature {
+  animation: bob 1.7s ease-in-out;
+}
+#stage.g-peek #creature {
+  animation: g-peek 1.6s ease-in-out;
+}
+#stage.g-ponder #creature {
+  animation: g-ponder 2.2s ease-in-out;
+}
+#stage.g-typing #creature {
+  animation: g-typing 1.4s linear;
+}
+#stage.g-dream #creature {
+  animation: g-dream 2.6s ease-in-out;
+}
+#stage.g-sneeze #creature {
+  animation: g-sneeze 0.9s ease-in-out;
+}
+#stage.g-stretch #creature {
+  animation: g-stretch 1.3s ease-in-out;
+}
+#stage.g-tilt #creature {
+  animation: g-tilt 1.2s ease-in-out;
+}
+#stage.g-bounce #creature {
+  animation: g-bounce 1s ease-in-out;
+}
+#stage.g-spin #creature {
+  animation: g-spin 0.9s ease-in-out;
+}
+#stage.g-shiver #creature {
+  animation: g-shiver 0.7s ease-in-out;
+}
+#stage.g-roll #creature {
+  animation: g-roll 2s ease-in-out;
+}
+#stage.g-yawn #creature {
+  animation: g-yawn 1.5s ease-in-out;
+}
+#stage.g-levelup #creature {
+  animation: g-levelup 1.4s ease-in-out;
+}
+#stage.g-battle-win #creature {
+  animation: g-battle-win 3.4s ease-in-out;
+}
+#stage.g-battle-lose #creature {
+  animation: g-battle-lose 3.4s ease-in-out;
+}
+
+/* ---- 待っているあいだの、細かい動き ----------------------------------
+   **何も起きていない時間がいちばん長い。** ここが薄いと、数日で置物に見える。
+   下の 12 個はどれも小道具を持たない身振りなので、絵を足さずに density だけ
+   増やせる ── 大きく動くものと、ほとんど動かないものを混ぜてある
+   （全部が跳ねると、うるさいだけで生き物には見えない）。 */
+
+/* うなずく。**下げるのは速く、戻すのは遅い** ── 逆にすると首振りに見える */
+@keyframes g-nod {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateY(0);
+  }
+  18% {
+    transform: scale(var(--scale)) rotate(9deg) translateY(4px);
+  }
+  40% {
+    transform: scale(var(--scale)) rotate(-2deg) translateY(-1px);
+  }
+  58% {
+    transform: scale(var(--scale)) rotate(7deg) translateY(3px);
+  }
+}
+
+/* 首を振る（ちがう、ちがう）。**縦には動かさない** ── 動かすと、うなずきと混ざる */
+@keyframes g-shake {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  20% {
+    transform: scale(var(--scale)) rotate(-8deg);
+  }
+  45% {
+    transform: scale(var(--scale)) rotate(8deg);
+  }
+  70% {
+    transform: scale(var(--scale)) rotate(-5deg);
+  }
+  88% {
+    transform: scale(var(--scale)) rotate(3deg);
+  }
+}
+
+/* 鼻歌。左右に大きくゆっくり ── 動きが小さいので、長めに置くと効く */
+@keyframes g-sway {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: scale(var(--scale)) translateX(-6px) rotate(-5deg);
+  }
+  50% {
+    transform: scale(var(--scale)) translateX(0) rotate(0deg);
+  }
+  75% {
+    transform: scale(var(--scale)) translateX(6px) rotate(5deg);
+  }
+}
+
+/* 何かに気づいて、ピンと伸びる。**止まる時間を長く取る**のがこの動きの本体 */
+@keyframes g-perk {
+  0% {
+    transform: scale(var(--scale)) translateY(0) scaleY(1);
+  }
+  12% {
+    transform: scale(var(--scale)) translateY(-7px) scaleY(1.1) scaleX(0.95);
+  }
+  22%,
+  72% {
+    transform: scale(var(--scale)) translateY(-4px) scaleY(1.05) scaleX(0.98);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0) scaleY(1);
+  }
+}
+
+/* ため息。しぼんで、ゆっくり戻る */
+@keyframes g-sigh {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) scaleY(1);
+  }
+  25% {
+    transform: scale(var(--scale)) translateY(-3px) scaleY(1.06) scaleX(0.97);
+  }
+  55% {
+    transform: scale(var(--scale)) translateY(5px) scaleY(0.9) scaleX(1.05);
+  }
+  80% {
+    transform: scale(var(--scale)) translateY(2px) scaleY(0.96) scaleX(1.02);
+  }
+}
+
+/* ぐらっとして、持ち直す。**戻りすぎてから収まる**と生き物に見える */
+@keyframes g-wobble {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateX(0);
+  }
+  20% {
+    transform: scale(var(--scale)) rotate(-14deg) translateX(-5px);
+  }
+  45% {
+    transform: scale(var(--scale)) rotate(10deg) translateX(4px);
+  }
+  68% {
+    transform: scale(var(--scale)) rotate(-5deg) translateX(-2px);
+  }
+  85% {
+    transform: scale(var(--scale)) rotate(2deg) translateX(1px);
+  }
+}
+
+/* つまずいて、持ち直す。前に泳いでから戻る */
+@keyframes g-stumble {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translate(0, 0) rotate(0deg);
+  }
+  18% {
+    transform: scale(var(--scale)) translate(-9px, 3px) rotate(-16deg);
+  }
+  34% {
+    transform: scale(var(--scale)) translate(-4px, 6px) rotate(-6deg) scaleY(0.92);
+  }
+  60% {
+    transform: scale(var(--scale)) translate(3px, -2px) rotate(8deg);
+  }
+  82% {
+    transform: scale(var(--scale)) translate(0, 0) rotate(-3deg);
+  }
+}
+
+/* 2 回、小さく跳ねる。bounce より低く速い ── 上機嫌のほう */
+@keyframes g-hop {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateY(0) scaleY(1);
+  }
+  12% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.88) scaleX(1.08);
+  }
+  30% {
+    transform: scale(var(--scale)) translateY(-11px) scaleY(1.06) scaleX(0.96);
+  }
+  48% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.9) scaleX(1.06);
+  }
+  66% {
+    transform: scale(var(--scale)) translateY(-8px) scaleY(1.04) scaleX(0.97);
+  }
+  84% {
+    transform: scale(var(--scale)) translateY(0) scaleY(0.95) scaleX(1.03);
+  }
+}
+
+/* 後ろを振り返る。潰して戻すことで「向こうを向いた」に見せる（spin と同じ手） */
+@keyframes g-lookback {
+  0%,
+  100% {
+    transform: scale(var(--scale)) scaleX(1) rotate(0deg);
+  }
+  /* **薄いままの時間を長く取らない。** 潰れた姿で居座ると、振り返ったのではなく
+     絵が壊れているように見える ── 通り抜けるのは一瞬でいい */
+  22% {
+    transform: scale(var(--scale)) scaleX(0.5) rotate(-6deg) translateX(-6px);
+  }
+  38% {
+    transform: scale(var(--scale)) scaleX(0.38) rotate(-2deg) translateX(-8px);
+  }
+  54% {
+    transform: scale(var(--scale)) scaleX(0.62) rotate(4deg) translateX(-5px);
+  }
+  74% {
+    transform: scale(var(--scale)) scaleX(0.9) rotate(3deg) translateX(-2px);
+  }
+}
+
+/* 頭をかく。小刻みに傾けながら、少しだけ浮く */
+@keyframes g-scratch {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateY(0);
+  }
+  20% {
+    transform: scale(var(--scale)) rotate(-11deg) translateY(-2px);
+  }
+  35% {
+    transform: scale(var(--scale)) rotate(-7deg) translateY(-3px);
+  }
+  50% {
+    transform: scale(var(--scale)) rotate(-11deg) translateY(-2px);
+  }
+  65% {
+    transform: scale(var(--scale)) rotate(-7deg) translateY(-3px);
+  }
+  85% {
+    transform: scale(var(--scale)) rotate(-3deg) translateY(-1px);
+  }
+}
+
+/* 集中する。**ほとんど動かない** ── 少しだけ前に出て、そのまま止まる。
+   賑やかな動きばかりだと、止まっている瞬間が効かなくなる */
+@keyframes g-focus {
+  0% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+  18%,
+  82% {
+    transform: scale(calc(var(--scale) * 1.03)) translateY(3px);
+  }
+  100% {
+    transform: scale(var(--scale)) translateY(0);
+  }
+}
+
+/* 寝息。ゆっくり膨らんで、しぼむ */
+@keyframes g-snore {
+  0%,
+  100% {
+    transform: scale(var(--scale)) scaleY(1) scaleX(1) translateY(0);
+  }
+  40% {
+    transform: scale(var(--scale)) scaleY(1.05) scaleX(1.04) translateY(-3px);
+  }
+  70% {
+    transform: scale(var(--scale)) scaleY(0.97) scaleX(1.01) translateY(1px);
+  }
+}
+
+/* 寝返り。roll が横に転がるのに対して、こちらは**向きを変えて落ち着く** */
+@keyframes g-turnover {
+  0% {
+    transform: scale(var(--scale)) rotate(0deg) translateX(0);
+  }
+  30% {
+    transform: scale(var(--scale)) rotate(-18deg) translateX(-7px) scaleY(0.94);
+  }
+  55% {
+    transform: scale(var(--scale)) rotate(4deg) translateX(5px) scaleX(0.9);
+  }
+  80% {
+    transform: scale(var(--scale)) rotate(12deg) translateX(6px);
+  }
+  100% {
+    transform: scale(var(--scale)) rotate(8deg) translateX(4px);
+  }
+}
+
+#stage.g-nod #creature {
+  animation: g-nod 1.3s ease-in-out;
+}
+#stage.g-shake #creature {
+  animation: g-shake 1.2s ease-in-out;
+}
+#stage.g-sway #creature {
+  animation: g-sway 2.4s ease-in-out;
+}
+#stage.g-perk #creature {
+  animation: g-perk 1.8s ease-out;
+}
+#stage.g-sigh #creature {
+  animation: g-sigh 1.9s ease-in-out;
+}
+#stage.g-wobble #creature {
+  animation: g-wobble 1.4s ease-in-out;
+}
+#stage.g-stumble #creature {
+  animation: g-stumble 1.5s ease-in-out;
+}
+#stage.g-hop #creature {
+  animation: g-hop 1.2s ease-in-out;
+}
+#stage.g-lookback #creature {
+  animation: g-lookback 1.6s ease-in-out;
+}
+#stage.g-scratch #creature {
+  animation: g-scratch 1.5s ease-in-out;
+}
+#stage.g-focus #creature {
+  animation: g-focus 2s ease-in-out;
+}
+#stage.g-snore #creature {
+  animation: g-snore 2.8s ease-in-out;
+}
+#stage.g-turnover #creature {
+  animation: g-turnover 2.4s ease-in-out;
+}
+
+/* ── 型（persona.js）で顔つきが変わる ──────────────────────
+   4 文字ぶんのクラス（p-E / p-I / …）が #stage に付く。
+   **型が字面だけにならないように**、目つきと口元をその人の使い方で変える。
+   気分やしぐさのアニメーションとは別のプロパティしか触らないので、
+   どのしぐさの最中でも顔だけは型のまま残る。 */
+
+/* 刻む人は瞳が小さい（一点を見ている）／委ねる人は大きい（放っている） */
+#stage.p-cut .pupil {
+  r: 2.7;
+}
+#stage.p-trust .pupil {
+  r: 5.6;
+}
+
+/* 外に出て行く人は口が大きい／籠る人は結んでいる */
+#stage.p-out #mouth {
+  d: path('M88 140 Q 100 156 112 140');
+}
+#stage.p-in #mouth {
+  d: path('M93 144 Q 100 146 107 144');
+}
+
+/* 組み立てる人は目が寄っている（近くを見る）／動かす人は離れて広く見る */
+#stage.p-build #face {
+  transform: scaleX(0.88);
+  transform-origin: 100px 130px;
+}
+#stage.p-move #face {
+  transform: scaleX(1.12);
+  transform-origin: 100px 130px;
+}
+
+/* 走り切る人はまぶたが少し下りている（腰を据えている）／散らす人は見開いている */
+#stage.p-through .eyeball {
+  r: 7.4;
+}
+#stage.p-spread .eyeball {
+  r: 10.4;
+}
+
+/* きょろきょろ。体は普通に揺れているので、動かすのは目だけ */
+@keyframes g-eyes {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3.5px, 0);
+  }
+  60% {
+    transform: translate(3.5px, -1px);
+  }
+}
+#stage.g-look .pupil {
+  animation: g-eyes 1.7s ease-in-out;
+}
+
+/* あくび。口が開いて、目が閉じる。
+   線だけだと小さくて気づけないので、開いている間は中を塗る。 */
+@keyframes g-mouth {
+  0%,
+  100% {
+    d: path('M92 142 Q 100 149 108 142');
+    fill: transparent;
+  }
+  45% {
+    d: path('M89 137 Q 100 163 111 137');
+    fill: var(--ink);
+  }
+}
+#stage.g-yawn #mouth {
+  animation: g-mouth 1.5s ease-in-out;
+}
+#stage.g-yawn .lid {
+  opacity: 1;
+}
+#stage.g-yawn .pupil,
+#stage.g-yawn .eyeball {
+  opacity: 0;
+}
+
+/* のぞきこむときは瞳を下げる。体だけ倒しても、目が前を向いていないと
+   「近づいてきた」ではなく「傾いた」に見える */
+@keyframes g-eyes-down {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  30%,
+  70% {
+    transform: translate(0, 2.5px);
+  }
+}
+#stage.g-peek .pupil {
+  animation: g-eyes-down 1.6s ease-in-out;
+}
+
+/* 考えこむときは上を見る。首をひねっている間だけ、瞳が斜め上で止まる */
+@keyframes g-eyes-up {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20%,
+  60% {
+    transform: translate(-2px, -3px);
+  }
+}
+#stage.g-ponder .pupil {
+  animation: g-eyes-up 2.2s ease-in-out;
+}
+
+/* 寝言のあいだは目を閉じたまま */
+#stage.g-dream .lid {
+  opacity: 1;
+}
+#stage.g-dream .pupil,
+#stage.g-dream .eyeball {
+  opacity: 0;
+}
+
+/* くしゃみ。はじける一瞬だけ目をつぶって、口が開く */
+@keyframes g-sneeze-eyes {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  40%,
+  60% {
+    opacity: 0;
+  }
+}
+@keyframes g-sneeze-mouth {
+  0%,
+  100% {
+    d: path('M92 142 Q 100 149 108 142');
+    fill: transparent;
+  }
+  50% {
+    d: path('M93 139 Q 100 156 107 139');
+    fill: var(--ink);
+  }
+}
+#stage.g-sneeze .pupil,
+#stage.g-sneeze .eyeball {
+  animation: g-sneeze-eyes 0.9s ease-in-out;
+}
+#stage.g-sneeze #mouth {
+  animation: g-sneeze-mouth 0.9s ease-in-out;
+}
+
+/* 戦っている間だけ、足元の影を踏み込みに合わせて動かす */
+@keyframes g-shadow {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(1);
+  }
+  26%,
+  48% {
+    transform: translateX(14px) scaleX(0.86);
+  }
+}
+#stage.g-battle-win #shadow,
+#stage.g-battle-lose #shadow {
+  animation: g-shadow 3.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #creature,
+  #aura ellipse,
+  #shadow,
+  #mouth,
+  .pupil {
+    animation: none !important;
+  }
+}
+
+
+/* ---- 暮らし ----------------------------------------------------------
+   画面の前にいる間、ずっと何かしている（shared/gestures.js の ACTIVITIES）。
+   しぐさが 1〜2 秒の身振りなのに対して、こちらは 4〜7 秒の場面で、
+   たいてい小道具を持つ。
+
+   小道具は **既定で消えていて**、その場面のクラスが付いたときだけ出る。
+   #creature の外に置いてあるので、体の伸び縮みに巻き込まれない
+   ── 巻き込むと、伸びをするたびに丼まで伸びる。 */
+
+.prop {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.prop * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 小道具の色。体と同じ色相に乗せて、画面の中で浮かないようにする */
+#props .bun,
+#props .basket,
+#props .bowl,
+#props .cup,
+#props .paper,
+#props .page,
+#props .screen {
+  fill: hsl(var(--hue) 24% 82%);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+#props .patty,
+#props .head,
+#props .spine,
+#props .fold,
+#props .stand,
+#props .handle,
+#props .chopsticks,
+#props .tip {
+  fill: var(--ink);
+  stroke: none;
+}
+#props .spine,
+#props .fold {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+#props .leaf,
+#props .dumpling,
+#props .lens,
+#props .cloth {
+  fill: var(--body);
+  stroke: var(--body-dark);
+  stroke-width: 2.5;
+}
+#props .tube {
+  fill: var(--body-dark);
+}
+#props .noodle,
+#props .steam path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+#props .flicker {
+  fill: hsl(var(--hue) 60% 70%);
+}
+
+/* 場面ごとに、その回に要る小道具だけ出す */
+#stage.g-burger #prop-burger,
+#stage.g-bun #prop-bun,
+#stage.g-soba #prop-soba,
+#stage.g-tea #prop-tea,
+#stage.g-movie #prop-movie,
+#stage.g-nap #prop-blanket,
+#stage.g-doze #prop-blanket,
+#stage.g-reading #prop-book,
+#stage.g-hammering #prop-hammer,
+#stage.g-carving #prop-brush,
+#stage.g-scouting #prop-scope,
+#stage.g-sending #prop-letter,
+#stage.g-cat #prop-cat,
+#stage.g-catnap #prop-cat,
+#stage.g-bird #prop-bird,
+#stage.g-turtle #prop-turtle {
+  opacity: 1;
+}
+
+/* 食べる ── 口へ運んで、噛んで、また運ぶ。体は少し傾く */
+@keyframes g-eat {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  15%,
+  45%,
+  75% {
+    transform: scale(var(--scale)) rotate(7deg) translateX(4px);
+  }
+  30%,
+  60%,
+  90% {
+    transform: scale(var(--scale)) rotate(4deg) translateX(2px) scaleY(0.97);
+  }
+}
+
+/* 食べ物は**口まで**寄っていって、少しずつ減る。
+   寄せ幅が足りないと、頬のあたりで齧っている絵になる（-16px だとそうだった）。 */
+@keyframes prop-eaten {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(-34px, 4px) scale(0.94);
+  }
+  55% {
+    transform: translate(-34px, 4px) scale(0.72);
+  }
+  80% {
+    transform: translate(-34px, 4px) scale(0.5);
+  }
+  100% {
+    transform: translate(-34px, 4px) scale(0.35);
+    opacity: 0;
+  }
+}
+
+/*
+ * 食べる 3 つ。**長さは gestures.js の ms と合わせる** ── 3 つまとめて 5.2s に
+ * していたので、そば（5.6s）とあんまん（5.4s）は食べ終わってから
+ * 0.2〜0.4 秒ぶん止まったまま待っていた。ついでに 3 つとも違う長さになって、
+ * 続けて出たときに同じ動きの繰り返しに見えにくくなる。
+ */
+#stage.g-burger #creature {
+  animation: g-eat 5.2s ease-in-out;
+}
+#stage.g-bun #creature {
+  animation: g-eat 5.4s ease-in-out;
+}
+#stage.g-soba #creature {
+  animation: g-eat 5.6s ease-in-out;
+}
+#stage.g-burger #prop-burger,
+#stage.g-bun #prop-bun,
+#stage.g-soba #prop-soba {
+  animation: prop-eaten 5.2s ease-in-out;
+}
+
+/* 湯気は、湯気らしくゆっくり上がる */
+@keyframes prop-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+#stage.g-bun .steam path,
+#stage.g-tea .steam path {
+  animation: prop-steam 2.4s ease-out infinite;
+}
+#stage.g-bun .steam path:nth-child(2),
+#stage.g-tea .steam path:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+/* お茶 ── すすって、ひと息 */
+@keyframes g-sip {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  25%,
+  55% {
+    transform: scale(var(--scale)) rotate(6deg) translateY(2px);
+  }
+  70% {
+    transform: scale(var(--scale)) rotate(0deg) scaleY(1.03);
+  }
+}
+#stage.g-tea #creature {
+  animation: g-sip 4.4s ease-in-out;
+}
+
+/* 映画 ── 画面のほうを向いて、たまに笑う。光は不規則に瞬く */
+@keyframes g-watch {
+  0%,
+  100% {
+    transform: scale(var(--scale)) translateX(0);
+  }
+  20% {
+    transform: scale(var(--scale)) translateX(-6px) rotate(-3deg);
+  }
+  55% {
+    transform: scale(var(--scale)) translateX(-6px) rotate(-3deg) translateY(-4px);
+  }
+  80% {
+    transform: scale(var(--scale)) translateX(-4px) rotate(-2deg);
+  }
+}
+@keyframes prop-flicker {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  35% {
+    opacity: 0.5;
+  }
+  60% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.45;
+  }
+}
+#stage.g-movie #creature {
+  animation: g-watch 7s ease-in-out;
+}
+#stage.g-movie .flicker {
+  animation: prop-flicker 1.1s steps(1, end) infinite;
+}
+/* 観ているあいだは瞳も画面のほうへ寄る */
+#stage.g-movie .pupil {
+  transform: translate(-3px, 0);
+}
+
+/* 昼寝 ── 布団がかかって、ゆっくり息をする */
+@keyframes g-nap {
+  0%,
+  100% {
+    transform: scale(var(--scale)) scaleY(0.94) translateY(6px);
+  }
+  50% {
+    transform: scale(var(--scale)) scaleY(0.99) translateY(4px);
+  }
+}
+@keyframes prop-tuck {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+}
+#stage.g-nap #creature,
+#stage.g-doze #creature {
+  animation: g-nap 3.2s ease-in-out infinite;
+}
+#stage.g-nap #prop-blanket,
+#stage.g-doze #prop-blanket {
+  animation: prop-tuck 6s ease-in-out;
+}
+#stage.g-nap .lid,
+#stage.g-doze .lid {
+  opacity: 1;
+}
+#stage.g-nap .pupil,
+#stage.g-nap .eyeball,
+#stage.g-doze .pupil,
+#stage.g-doze .eyeball {
+  opacity: 0;
+}
+
+/* 読む ── あなたが出てきたものを追っている間、相棒も本を読む。
+   ページを追って、視線が左右に流れる */
+@keyframes g-reading {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: scale(var(--scale)) rotate(2deg) translateY(3px);
+  }
+}
+@keyframes prop-page {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  48% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+}
+@keyframes g-read-eyes {
+  0%,
+  100% {
+    transform: translate(-3px, 3px);
+  }
+  50% {
+    transform: translate(3px, 3px);
+  }
+}
+#stage.g-reading #creature {
+  animation: g-reading 5s ease-in-out infinite;
+}
+#stage.g-reading #prop-book {
+  animation: prop-page 1.6s ease-in-out infinite;
+}
+#stage.g-reading .pupil {
+  animation: g-read-eyes 1.6s ease-in-out infinite;
+}
+
+/* 叩く ── Bash が走っている間。金づちが上下する */
+@keyframes g-hammering {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  25% {
+    transform: scale(var(--scale)) rotate(5deg) translateY(-2px);
+  }
+  40% {
+    transform: scale(var(--scale)) rotate(2deg) translateY(2px) scaleY(0.96);
+  }
+}
+@keyframes prop-swing {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  45% {
+    transform: rotate(42deg) translateY(6px);
+  }
+}
+#stage.g-hammering #creature {
+  animation: g-hammering 0.7s ease-in-out infinite;
+}
+#stage.g-hammering #prop-hammer {
+  animation: prop-swing 0.7s ease-in-out infinite;
+  transform-origin: 154px 144px;
+}
+
+/* 彫る（書く）── 筆で細かく手を動かす */
+@keyframes prop-stroke {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  30% {
+    transform: translate(-3px, 3px) rotate(-6deg);
+  }
+  60% {
+    transform: translate(2px, 1px) rotate(4deg);
+  }
+}
+#stage.g-carving #creature {
+  animation: g-typing 1.4s linear infinite;
+}
+#stage.g-carving #prop-brush {
+  animation: prop-stroke 0.9s ease-in-out infinite;
+}
+
+/* 望遠鏡 ── 外を見に行っているあいだ、遠くを覗く */
+@keyframes g-scouting {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(-4deg);
+  }
+  40% {
+    transform: scale(var(--scale)) rotate(-9deg) translateY(-3px);
+  }
+  70% {
+    transform: scale(var(--scale)) rotate(-2deg);
+  }
+}
+#stage.g-scouting #creature {
+  animation: g-scouting 4.8s ease-in-out;
+}
+#stage.g-scouting .pupil {
+  transform: translate(3px, -3px);
+}
+
+/* 手紙 ── 任せたぶんが飛んでいく */
+@keyframes prop-fly {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(26px, -46px) rotate(18deg);
+    opacity: 0;
+  }
+}
+#stage.g-sending #creature {
+  animation: g-bounce 1s ease-in-out;
+}
+#stage.g-sending #prop-letter {
+  animation: prop-fly 2.2s ease-in infinite;
+}
+
+/* ------------------------------------------------------------------ *
+ * スキン ── 見た目の重ね着（src/core/skins.js）
+ *
+ * **数字に一切触らない。** ここで変えるのは色と、体に重ねる 1 枚と、
+ * 小物 1 つだけ。目つきと口元（型 = persona.js が決めるもの）には
+ * 一切掛からない ── **顔つきはスキンで買えない**。
+ *
+ * 色は #stage の変数を差し替えるだけなので、系統色（--hue）を上書きしない
+ * スキンでは、働き方の色がそのまま透ける。
+ * ------------------------------------------------------------------ */
+
+/* 模様と小物は、既定では全部消えている（props と同じ作り） */
+.tex,
+.trinket {
+  opacity: 0;
+}
+
+#skin-texture {
+  pointer-events: none;
+}
+
+/* ---- 墨 ---- */
+#stage.skin-mono {
+  --sat: 6%;
+  --body: hsl(var(--hue) var(--sat) 58%);
+  --body-dark: hsl(var(--hue) var(--sat) 34%);
+}
+#stage.skin-mono #tex-grain {
+  opacity: 0.14;
+}
+#tex-grain path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+/* ---- 熾火 ---- */
+#stage.skin-ember {
+  --hue: 16;
+  --sat: 72%;
+  --body: hsl(var(--hue) var(--sat) 58%);
+  --body-dark: hsl(var(--hue) var(--sat) 34%);
+  --ink: hsl(14 60% 16%);
+}
+#stage.skin-ember #tex-ember {
+  opacity: 0.5;
+}
+#stage.skin-ember #trinket-spark {
+  opacity: 1;
+}
+#tex-ember ellipse {
+  fill: hsl(42 100% 62%);
+}
+#trinket-spark circle {
+  fill: hsl(42 100% 68%);
+  animation: spark 2.4s ease-in-out infinite;
+}
+#trinket-spark circle:nth-child(2) {
+  animation-delay: 0.5s;
+}
+#trinket-spark circle:nth-child(3) {
+  animation-delay: 1.1s;
+}
+
+/* 火の粉は上に抜けて消える。**跳ねさせない** ── 常駐の画面で暴れると疲れる */
+@keyframes spark {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* ---- 霜 ---- */
+#stage.skin-frost {
+  --hue: 196;
+  --sat: 55%;
+  --body: hsl(var(--hue) var(--sat) 72%);
+  --body-dark: hsl(var(--hue) var(--sat) 48%);
+  --ink: hsl(205 45% 24%);
+}
+#stage.skin-frost #tex-frost {
+  opacity: 0.55;
+}
+#stage.skin-frost #trinket-breath {
+  opacity: 1;
+}
+#tex-frost path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#trinket-breath ellipse {
+  fill: #fff;
+  animation: breath 4.6s ease-in-out infinite;
+}
+#trinket-breath ellipse:nth-child(2) {
+  animation-delay: 0.35s;
+}
+#trinket-breath ellipse:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+@keyframes breath {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(8px, -4px);
+  }
+}
+
+/* ---- 宵 ---- */
+#stage.skin-dusk {
+  --hue: 268;
+  --sat: 48%;
+  --body: hsl(var(--hue) var(--sat) 52%);
+  --body-dark: hsl(var(--hue) var(--sat) 30%);
+  --ink: hsl(265 40% 88%);
+}
+#stage.skin-dusk #tex-stars {
+  opacity: 0.85;
+}
+#stage.skin-dusk #trinket-moth {
+  opacity: 1;
+}
+#tex-stars circle {
+  fill: #fff;
+  animation: twinkle 5.2s ease-in-out infinite;
+}
+#tex-stars circle:nth-child(2n) {
+  animation-delay: 1.3s;
+}
+#tex-stars circle:nth-child(3n) {
+  animation-delay: 2.6s;
+}
+#trinket-moth path {
+  fill: hsl(48 40% 84%);
+}
+#trinket-moth circle {
+  fill: var(--body-dark);
+}
+#trinket-moth {
+  transform-origin: 55px 90px;
+  animation: flutter 3.8s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes flutter {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  35% {
+    transform: translate(-4px, -6px);
+  }
+  70% {
+    transform: translate(3px, -2px);
+  }
+}
+
+
+/* ------------------------------------------------------------------ *
+ * じゃれてくる相手（gestures.js の cat / bird / turtle）
+ *
+ * **世話をするものではない。** 餌やりも撫でるボタンも無く、向こうから来て
+ * 勝手に帰る ── こちらができるのは眺めることだけ（DESIGN.md §3）。
+ *
+ * 動きは 2 つに分かれる。相手は歩いてきて遊んで帰る（prop 側）、
+ * こちらは相手のほうに体を傾ける（creature 側）── 両方が動かないと、
+ * 「同じ画面に 2 匹いる」だけで「じゃれている」に見えない。
+ * ------------------------------------------------------------------ */
+
+#props .fur {
+  fill: hsl(28 34% 74%);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+#props .beady {
+  fill: var(--ink);
+  stroke: none;
+}
+#props .tail,
+#props .whisker,
+#props .wing,
+#props .foot,
+#props .shellline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+#props .whisker {
+  opacity: 0.5;
+  stroke-width: 2;
+}
+#props .beak {
+  fill: hsl(38 80% 60%);
+  stroke: none;
+}
+#prop-turtle .fur {
+  fill: hsl(120 26% 62%);
+}
+#prop-bird .fur {
+  fill: hsl(200 40% 76%);
+}
+
+/*
+ * 猫は横から来て、しっぽを振りながら居座る。
+ *
+ * **動きは必ず場面のクラスの下に置く。** 素の `#prop-cat` に付けると、
+ * opacity を持つキーフレームが常に走って、`.prop { opacity: 0 }` を上書きする
+ * ── 消えているはずの猫と小鳥と亀が、いつも全部出ていた。
+ */
+#stage.g-cat #prop-cat {
+  animation: cat-visit 6.4s ease-out;
+}
+#stage.g-cat #prop-cat .tail {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: tail-flick 1.1s ease-in-out infinite;
+}
+
+/*
+ * 猫は歩いて来る。**一定速度で滑らせない** ── 滑ると、生き物ではなく
+ * 板が動いているように見えた。歩幅ぶんの上下（1〜2px）を刻みながら寄ってきて、
+ * 一度とびかかって、座って、また歩いて帰る。
+ */
+@keyframes cat-visit {
+  0% {
+    transform: translate(54px, 0);
+    opacity: 0;
+  }
+  5% {
+    transform: translate(48px, -1px);
+    opacity: 1;
+  }
+  10% {
+    transform: translate(40px, 1px);
+  }
+  15% {
+    transform: translate(32px, -1px);
+  }
+  20% {
+    transform: translate(24px, 1px);
+  }
+  25% {
+    transform: translate(16px, -1px);
+  }
+  30% {
+    transform: translate(10px, 1px);
+  }
+  /* 一度沈んでから、とびかかる */
+  36% {
+    transform: translate(6px, 3px) scale(0.96);
+  }
+  /* とびかかるのは**上へ**。左へ寄せると相棒の体に重なって、頭だけ出た
+     よく分からない生き物になる（枠の外に置いてある意味が消える） */
+  42% {
+    transform: translate(3px, -11px) scale(1.06);
+  }
+  48% {
+    transform: translate(0, 0) scale(1);
+  }
+  52%,
+  72% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  /* 帰りは背を向けるので、少しだけ縮めて向きの変化に見せる */
+  78% {
+    transform: translate(12px, -1px) scaleX(0.94);
+  }
+  84% {
+    transform: translate(26px, 1px) scaleX(0.94);
+  }
+  92% {
+    transform: translate(42px, -1px) scaleX(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(56px, 0) scaleX(0.94);
+    opacity: 0;
+  }
+}
+
+@keyframes tail-flick {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+
+/* 小鳥は上から降りてきて、頭のあたりで跳ねる */
+#stage.g-bird #prop-bird {
+  animation: bird-visit 5.6s ease-in-out;
+}
+#stage.g-bird #prop-bird .wing {
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: wing-flap 0.5s ease-in-out infinite;
+}
+
+/*
+ * **降りるのは弧を描かせる。** 真っ直ぐ降ろすと落ちてきたように見える。
+ * 着いたら 2 回ついばんで、跳ねて、翼を広げて上へ抜ける。
+ */
+@keyframes bird-visit {
+  0% {
+    transform: translate(34px, -46px) rotate(14deg);
+    opacity: 0;
+  }
+  8% {
+    transform: translate(26px, -30px) rotate(10deg);
+    opacity: 1;
+  }
+  16% {
+    transform: translate(12px, -14px) rotate(4deg);
+  }
+  22% {
+    transform: translate(2px, -2px) rotate(0deg);
+  }
+  26% {
+    transform: translate(0, 0);
+  }
+  /* ついばむ ── 前に倒して、戻す */
+  34% {
+    transform: translate(1px, 3px) rotate(16deg);
+  }
+  40% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  46% {
+    transform: translate(1px, 3px) rotate(16deg);
+  }
+  52% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  /* 跳ねる */
+  60% {
+    transform: translate(-2px, -7px);
+  }
+  66% {
+    transform: translate(-4px, 0);
+  }
+  74% {
+    transform: translate(-4px, 0);
+    opacity: 1;
+  }
+  86% {
+    transform: translate(6px, -22px) rotate(-8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(22px, -52px) rotate(-16deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wing-flap {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-30deg);
+  }
+}
+
+/* 亀は急がない。**出るのも帰るのも遅い**のが、この相手の芸 */
+#stage.g-turtle #prop-turtle {
+  animation: turtle-visit 6.8s linear;
+}
+/* 甲羅を左右にゆっくり傾ける ── 足が見えなくても、歩いているように見える */
+#stage.g-turtle #prop-turtle .fur {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: turtle-rock 1.6s ease-in-out infinite;
+}
+
+@keyframes turtle-visit {
+  0% {
+    transform: translateX(42px);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  /* 一度止まって、顔を上げる（首を伸ばすぶんだけ縦に伸ばす） */
+  40% {
+    transform: translateX(6px) scaleY(1);
+  }
+  48% {
+    transform: translateX(4px) scaleY(1.08);
+  }
+  58% {
+    transform: translateX(2px) scaleY(1);
+  }
+  72% {
+    transform: translateX(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+}
+
+@keyframes turtle-rock {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* ---- こちら側の動き ----
+   **必ず scale(var(--scale)) から書く。** 抜くと、しぐさに入った瞬間に
+   レベルぶんの大きさが飛ぶ。 */
+
+/* 猫にじゃれる ── 覗きこんで、ちょっかいを出して、また戻る */
+@keyframes g-cat {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) translateX(0);
+  }
+  20% {
+    transform: scale(var(--scale)) rotate(9deg) translateX(6px);
+  }
+  35% {
+    transform: scale(var(--scale)) rotate(4deg) translateX(3px) translateY(-4px);
+  }
+  50% {
+    transform: scale(var(--scale)) rotate(11deg) translateX(7px);
+  }
+  70% {
+    transform: scale(var(--scale)) rotate(2deg) translateX(2px) translateY(-3px);
+  }
+}
+
+/* 頭にとまられた ── 落とさないように、そっとしている */
+@keyframes g-bird {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  20%,
+  80% {
+    transform: scale(var(--scale)) rotate(-2deg) translateY(1px);
+  }
+  50% {
+    transform: scale(var(--scale)) rotate(2deg) translateY(1px);
+  }
+}
+
+/* 亀を見送る ── ゆっくり首をかしげるだけ */
+@keyframes g-turtle {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg);
+  }
+  40% {
+    transform: scale(var(--scale)) rotate(7deg) translateY(2px);
+  }
+  75% {
+    transform: scale(var(--scale)) rotate(3deg);
+  }
+}
+
+/* 猫と一緒に寝る ── 二匹とも動かない。息だけしている */
+@keyframes g-catnap {
+  0%,
+  100% {
+    transform: scale(var(--scale)) rotate(0deg) scaleY(0.99);
+  }
+  50% {
+    transform: scale(var(--scale)) rotate(1deg) scaleY(1.02);
+  }
+}
+
+#stage.g-cat #creature {
+  animation: g-cat 6.4s ease-in-out;
+}
+#stage.g-bird #creature {
+  animation: g-bird 5.6s ease-in-out;
+}
+#stage.g-turtle #creature {
+  animation: g-turtle 6.8s ease-in-out;
+}
+#stage.g-catnap #creature {
+  animation: g-catnap 3.5s ease-in-out infinite;
+}
+
+/* 寝ているところに来た猫は、丸まって動かない（歩いて帰らない） */
+#stage.g-catnap #prop-cat {
+  animation: cat-curl 7s ease-in-out;
+}
+#stage.g-catnap #prop-cat .tail {
+  animation: none;
+}
+
+@keyframes cat-curl {
+  0% {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  20%,
+  100% {
+    transform: translate(-4px, 6px) scale(0.92);
+    opacity: 1;
+  }
+}
+
+/* ---- 空 -------------------------------------------------------------
+   **いちばん長く見ている画面が「何も起きていないオーバーレイ」**なので
+   （DESIGN.md §5c）、そこが 1 日じゅう同じ色なのはもったいない。
+
+   **見た目だけ。数字には一切効かない** ── 効かせると「夜に働くと得」が
+   生まれて、§1（戦闘力の出どころは作業ログ）に別の入口ができる。
+
+   **窓の内側で必ず消えきる大きさにする。** オーバーレイの背景は完全透明で
+   なければならず（このファイルの先頭）、窓の縁に届く光を置くと、そこで
+   ばっさり切れて**デスクトップに四角が出る**。だから中心は下寄り、半径は
+   40% / 26% ── 200x200 の中で x 20〜180・y 92〜196 に収まる。 */
+
+#stage {
+  transition: background 8s ease;
+}
+
+#stage.sky-dawn {
+  background: radial-gradient(40% 26% at 50% 72%, hsl(22 62% 42% / 0.55), transparent 100%);
+}
+#stage.sky-day {
+  background: radial-gradient(40% 26% at 50% 72%, hsl(200 52% 46% / 0.4), transparent 100%);
+}
+#stage.sky-dusk {
+  background: radial-gradient(40% 26% at 50% 72%, hsl(288 50% 42% / 0.5), transparent 100%);
+}
+#stage.sky-night {
+  background: radial-gradient(40% 26% at 50% 72%, hsl(226 58% 34% / 0.6), transparent 100%);
+}
+
+/* 夜だけ、影を少し薄くして沈ませる */
+#stage.sky-night #shadow {
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #stage {
+    transition: none;
+  }
+}

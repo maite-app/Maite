@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>card</title>
+    <!--
+      相棒の絵は**オーバーレイと同じ style.css を読んで**出す。
+      カード用に描き直すと、装備・小物・使い込み・スキンの出し分けが 2 通りに
+      育つ ── そこがズレた瞬間、名刺は「本人と少し違う絵」になる。
+    -->
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /*
+       * 名刺。**1200x630**（SNS のカードがこの比で切られる）。
+       *
+       * 貼ったときに読めるのは 3 つだけ ── 名前・位・肩書き。それ以外は
+       * 「よく見ると書いてある」の位置に置く。詰め込むと、縮小されたときに
+       * 全部読めなくなる。
+       */
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #0f1116;
+        color: #e8ecf4;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      }
+
+      #card {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        display: grid;
+        grid-template-columns: 470px 1fr;
+        align-items: center;
+        /* 系統色をうっすら敷く。相棒の色がそのままカードの色になる */
+        background:
+          radial-gradient(52% 62% at 22% 52%, hsl(var(--card-hue) 45% 22% / 0.85), transparent 70%),
+          #0f1116;
+      }
+
+      /* 絵はオーバーレイと同じ 200x200 を、そのまま 2.1 倍に拡げる */
+      #shot {
+        justify-self: center;
+        transform: scale(2.05);
+        transform-origin: center;
+      }
+
+      #stage {
+        /* カードでは吹き出しも下の帯も出さない。**絵だけ** */
+        background: none !important;
+      }
+
+      #bubble,
+      #badge {
+        display: none !important;
+      }
+
+      #right {
+        padding-right: 72px;
+      }
+
+      #name {
+        font-size: 82px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        margin: 0 0 6px;
+      }
+
+      #title {
+        font-size: 27px;
+        font-weight: 600;
+        color: hsl(var(--card-hue) 45% 72%);
+        margin: 0 0 34px;
+      }
+
+      #level {
+        display: inline-block;
+        font-size: 34px;
+        font-weight: 800;
+        padding: 4px 20px;
+        border-radius: 999px;
+        background: hsl(var(--card-hue) 45% 24%);
+        color: hsl(var(--card-hue) 55% 82%);
+        margin-bottom: 30px;
+      }
+
+      .rows {
+        display: grid;
+        grid-template-columns: auto auto;
+        column-gap: 26px;
+        row-gap: 11px;
+        font-size: 23px;
+      }
+
+      .rows span {
+        color: #8b95a8;
+      }
+
+      .rows b {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /*
+       * 出どころの 1 行。**絶対配置で絵に重ねるのはやめた** ── #shot が
+       * transform で層を作るので、重ねる置き方だと描かれないことがあった。
+       * 数字の下に普通に置くほうが、読む順（名前 → 位 → 中身 → 何のアプリか）
+       * とも合っている。
+       */
+      #foot {
+        margin-top: 38px;
+        font-size: 20px;
+        color: #939db0;
+        letter-spacing: 0.06em;
+      }
+
+      #foot b {
+        color: #99a3b6;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="card">
+      <div id="shot">
+        <div id="stage" class="mood-idle">
+          <div id="pet-mount"></div>
+          <div id="bubble"><span id="bubble-text"></span></div>
+          <div id="badge"><span id="badge-level"></span></div>
+        </div>
+      </div>
+
+      <div id="right">
+        <div id="level"></div>
+        <h1 id="name"></h1>
+        <p id="title"></p>
+        <div class="rows" id="rows"></div>
+        <div id="foot"><b>Maite</b> — grown from Claude Code work logs</div>
+      </div>
+    </div>
+
+    <script src="../shared/pet-svg.js"></script>
+    <script src="card.js"></script>
+  </body>
+</html>

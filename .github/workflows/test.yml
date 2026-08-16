@@ -1,0 +1,58 @@
+# 落ちたまま気づかない、を無くすためだけのもの。
+#
+# 依存が devDependency の electron 1 つで、テスト自体は Node の標準機能だけで
+# 動く（`npm install` すら要らない）── だから CI も速いし、フォークした人の
+# 手元でも同じものがそのまま走る。
+#
+# 🔴 **このリポは private なので、ここの分数は無料枠 2,000分/月 から引かれる。**
+#    しかも課金は OS ごとの倍率つき（Linux ×1 / Windows ×2 / macOS ×10）で、
+#    1分未満は1分に切り上げ。テストが速いことは、**分数の節約にはならない**
+#    ── 28秒の macOS ジョブが 10分として引かれる。
+#
+#    2026-08-15 まで、1回走るごとに 16 分（うち macOS だけで 10 分）を使い、
+#    3日で無料枠の半分を消していた。下の 2 つはその手当てである。
+name: test
+
+on:
+  # 🔴 `branches: ['**']` にすると、PR のブランチへ push するたびに
+  #    push と pull_request で **同じものが2回走る**（＝分数も2倍）。
+  #    PR は pull_request 側で見るので、main だけにしても見る量は減らない。
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    # 手元は Windows、開発はクラウド（Linux）。パスの区切りや改行で転ぶのは
+    # たいてい別の OS の側なので、**この2つは両方回す**。
+    #
+    # macOS は外してある ── 倍率 ×10 で枠の6割を持っていくのに対し、
+    # **mac で動かしている人がまだ居ない。** 居るようになったら戻すこと。
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # electron は GUI 用なので、テストには要らない。入れないぶん速い
+      - run: npm test
+
+  # 生成物（server/src/assets.js）を焼き直し忘れていないか。
+  # 忘れると**本番だけ古い CSS / JS で動き続ける**ので、ここで止める
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run build:worker
+      - name: 焼き直しの差分が出ないこと
+        run: git diff --exit-code -- server/src/assets.js

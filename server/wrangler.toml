@@ -1,0 +1,18 @@
+name = "aipet"
+main = "src/worker.js"
+compatibility_date = "2026-01-01"
+
+# 「その人にとっての 1 日」をどこで切るか（分）。日本なら 540。
+#
+# **Worker のローカル時刻は UTC。** 指定しないと、日本時間の 9〜14 時が
+# 0〜5 時と見なされて「夜更かし」に数えられ、日次 EXP 上限の区切りも
+# PC 側と食い違う（実際に「夜目」が最上位まで育っていた）。
+[vars]
+AIPET_TZ_OFFSET = "540"
+
+# 受け取ったイベントと、畳んだ状態を入れる。
+# 別のアカウントで動かすときは `wrangler kv namespace create AIPET` を実行して
+# 出てきた id に差し替える。id は秘密ではない（読み書きにはアカウントの認証が要る）。
+[[kv_namespaces]]
+binding = "AIPET"
+id = "f5ef0c6e9b544c59b045dfd3a164c1e1"

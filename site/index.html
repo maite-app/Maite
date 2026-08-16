@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#eaf2fb" />
+<title>Maite — the desktop companion that levels up from your Claude Code logs</title>
+<meta name="description" content="Maite sits in the corner of your screen and grows from how you actually use Claude Code. No feeding, no daily missions, no notifications. Free and open source." />
+
+<meta property="og:title" content="Maite — a companion that grows from your work" />
+<meta property="og:description" content="It levels up from your Claude Code logs. You don't feed it. You just work." />
+<meta property="og:type" content="website" />
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Maite の紹介ページ。
+
+     **参考にしたのは compiss.app の組み立て** ── 薄い地の色に白い角丸
+     カード、絵文字をそのままアイコンに使う、顔のあるマスコットを主役に
+     置く、コピーは普通の言葉で少し笑える。自作アイコンを作らないのが
+     効いていて、そのぶん全部が「読める」ほうに寄る。
+
+     **画像を 1 枚も使わない。** 相棒の絵はアプリと同じ SVG をそのまま
+     置いてある（別に描き起こすと、ここだけ本人と違う顔になる）。
+     ───────────────────────────────────────────────────────────── */
+
+  :root {
+    --ink: #0f1622;
+    --ink-soft: #45536b;
+    --ink-faint: #7b89a0;
+    --card: #ffffff;
+    --line: #dfe8f4;
+    --brand: #2f6df0;
+    --brand-dark: #1f52c4;
+    --amber: #e08a4a;
+    --radius: 22px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    color: var(--ink);
+    font: 17px/1.75 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* 上が空、下が地面。長いページでも色が動き続ける */
+    background: linear-gradient(180deg, #e6f0fb 0%, #e8f4f4 42%, #e4f4ea 100%);
+    background-attachment: fixed;
+  }
+
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---- ヘッダー ---- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(232, 241, 251, 0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  }
+  .bar {
+    max-width: 660px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bar .mark { width: 40px; height: 40px; flex: none; }
+  .bar .spacer { flex: 1; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 11px 22px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(47, 109, 240, 0.28);
+  }
+  .btn.plain {
+    background: none;
+    color: var(--ink-soft);
+    box-shadow: none;
+    font-weight: 600;
+    padding: 11px 6px;
+  }
+
+  /* ---- ヒーロー ---- */
+  .hero { text-align: center; padding: 40px 0 8px; }
+  .hero .pet { width: 190px; height: 190px; }
+  .pill {
+    display: inline-block;
+    margin: 6px 0 18px;
+    padding: 7px 18px;
+    border-radius: 999px;
+    background: rgba(47, 109, 240, 0.11);
+    color: var(--brand-dark);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 0 0 18px;
+    font-size: 35px;
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+  .lede { margin: 0 auto 26px; font-size: 18px; color: var(--ink-soft); max-width: 30em; }
+  .hero .btn { font-size: 17px; padding: 15px 30px; }
+  .fineprint { margin-top: 18px; font-size: 14px; color: var(--ink-faint); }
+
+  /* ---- 白いカード ---- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    box-shadow: 0 10px 30px rgba(31, 63, 110, 0.07);
+  }
+
+  /* 帯（絵文字 + 太字 + 一言 の 3 行） */
+  .strip { padding: 0; overflow: hidden; margin: 42px 0; }
+  .strip div {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 14px;
+    align-items: center;
+    padding: 18px 24px;
+  }
+  .strip div + div { border-top: 1px solid var(--line); }
+  .strip .emoji { font-size: 26px; text-align: center; }
+  .strip b { display: block; font-size: 17px; color: var(--ink); }
+  .strip span { color: var(--ink-faint); font-size: 15px; }
+
+  /* ---- 節 ---- */
+  section { padding: 46px 0 10px; }
+  h2 {
+    margin: 0 0 6px;
+    font-size: 32px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    text-align: center;
+    font-weight: 800;
+  }
+  .sub { margin: 0 0 26px; text-align: center; color: var(--ink-soft); font-size: 17px; }
+
+  /* 横に流れるカード。**スマホでは切って並べない**（参考ページと同じ） */
+  .rail {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 20px 22px;
+    margin: 0 -20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail .card {
+    flex: 0 0 84%;
+    max-width: 340px;
+    scroll-snap-align: center;
+  }
+  .rail .icon {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    border-radius: 15px;
+    background: #eef3fd;
+    margin-bottom: 14px;
+  }
+  .rail h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -0.01em; }
+  .rail p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+
+  /* 1 2 3 の丸番号 */
+  .step { margin-bottom: 14px; }
+  .step .n {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 800;
+    font-size: 19px;
+    margin-bottom: 14px;
+  }
+  .step h3 { margin: 0 0 6px; font-size: 21px; }
+  .step p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+
+  /* ---- 端末の枠 ----------------------------------------------------
+     **中身は本物のスクリーンショット**（site/shots/、scripts/shots.mjs で
+     撮り直せる）。ここで画面を作り直さない ── それをやると、紹介ページの
+     画面だけが古いまま置いていかれる。
+
+     枠のほうは CSS。角丸・ベゼル・Dynamic Island・下の横棒まで入れると、
+     ただの画像が「実機で見た画面」に見える。 */
+  .shots {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 8px 20px 28px;
+    margin: 0 -20px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .shots::-webkit-scrollbar { display: none; }
+
+  .phone {
+    position: relative;
+    flex: 0 0 258px;
+    scroll-snap-align: center;
+    /* 縁の金属。内側に細い明るい線を入れると、板ではなく厚みに見える */
+    background: linear-gradient(150deg, #d7dfeb, #aab6c8 42%, #d9e1ed);
+    padding: 9px;
+    border-radius: 44px;
+    box-shadow:
+      0 22px 48px rgba(23, 48, 88, 0.22),
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+  }
+  .phone img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 500 / 1080;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 36px;
+    background: #12141a;
+  }
+  /* 上の黒い島。実機を見分ける手がかりはだいたいここ */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 21px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 78px;
+    height: 23px;
+    border-radius: 999px;
+    background: #05070b;
+    z-index: 2;
+  }
+  /* 下の横棒 */
+  .phone::after {
+    content: '';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 2;
+  }
+  .shot-note {
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 14px;
+    margin: -8px 0 0;
+  }
+
+  /* ---- 記録の 1 行 ---- */
+  pre {
+    margin: 0;
+    background: #0f1116;
+    color: #cfe0ff;
+    border-radius: 14px;
+    padding: 15px 16px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .kill { margin: 16px 0 0; padding-left: 20px; color: var(--ink-soft); font-size: 15.5px; }
+  .kill li { margin-bottom: 5px; }
+
+  /* ---- 値段 ---- */
+  .price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .price { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; }
+  .price-row em { font-style: normal; color: var(--ink-soft); font-size: 16px; }
+
+  /* ---- 締め ---- */
+  .closing {
+    background: linear-gradient(160deg, var(--brand), #2a5fd6);
+    color: #fff;
+    border-radius: 26px;
+    padding: 44px 28px;
+    text-align: center;
+    margin: 48px 0 0;
+    box-shadow: 0 16px 40px rgba(47, 109, 240, 0.26);
+  }
+  .closing h2 { color: #fff; }
+  .closing p { color: rgba(255, 255, 255, 0.86); margin: 0 auto 24px; max-width: 26em; }
+  .closing .btn { background: #fff; color: var(--brand-dark); box-shadow: none; }
+
+  /* ---- 足元 ---- */
+  footer { padding: 44px 0 60px; color: var(--ink-faint); font-size: 14.5px; }
+  .foot-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .foot-top svg { width: 34px; height: 34px; }
+  .foot-top b { color: var(--ink); font-size: 17px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 18px; }
+  footer a { color: var(--ink-soft); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (min-width: 620px) {
+    h1 { font-size: 52px; }
+    .rail .card { flex-basis: 320px; }
+    .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .step { margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  相棒の絵。**アプリと同じ形をそのまま置く**（src/shared/pet-svg.js）。
+  ここだけ描き起こすと、紹介ページの子と手元の子が別人になる。
+-->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="maite" viewBox="14 40 172 150">
+    <ellipse cx="100" cy="168" rx="42" ry="8" fill="#0f1622" opacity=".16"/>
+    <path d="M74 74 L82 52 L100 66 L118 52 L126 74 Z" fill="#e9c46a"/>
+    <path d="M100 78 C 138 78 156 106 156 130 C 156 154 132 166 100 166 C 68 166 44 154 44 130 C 44 106 62 78 100 78 Z" fill="#e08a4a"/>
+    <ellipse cx="66" cy="136" rx="9" ry="5.5" fill="#b9622f" opacity=".38"/>
+    <ellipse cx="134" cy="136" rx="9" ry="5.5" fill="#b9622f" opacity=".38"/>
+    <circle cx="82" cy="122" r="9" fill="#fff"/>
+    <circle cx="118" cy="122" r="9" fill="#fff"/>
+    <circle cx="82" cy="122" r="4" fill="#2a1c12"/>
+    <circle cx="118" cy="122" r="4" fill="#2a1c12"/>
+    <circle cx="79.4" cy="119.4" r="1.9" fill="#fff"/>
+    <circle cx="115.4" cy="119.4" r="1.9" fill="#fff"/>
+    <path d="M92 142 Q 100 149 108 142" fill="none" stroke="#2a1c12" stroke-width="3.5" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<header>
+  <div class="bar">
+    <svg class="mark" aria-hidden="true"><use href="#maite"/></svg>
+    <div class="spacer"></div>
+    <a class="btn" href="https://github.com/maite-app/maite">Get Maite</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="pet" aria-hidden="true"><use href="#maite"/></svg>
+    <p class="pill">It grows while you work</p>
+    <h1>A companion that levels up from your Claude&nbsp;Code logs.</h1>
+    <p class="lede">
+      Maite sits in the corner of your screen and gets stronger from how you actually
+      work. Its level, its stats, the skills it grows, even the name it goes by — all of
+      it comes out of your own logs.
+    </p>
+    <a class="btn" href="https://github.com/maite-app/maite">Get Maite — it's free</a>
+    <p class="fineprint">MIT licensed · No account · No ads · Works offline</p>
+  </div>
+
+  <div class="card strip">
+    <div><span class="emoji">🌱</span><span><b>Nothing to feed</b><span>No buttons, no daily missions</span></span></div>
+    <div><span class="emoji">🔒</span><span><b>Reads nothing</b><span>No prompts, no paths, no arguments</span></span></div>
+    <div><span class="emoji">🤫</span><span><b>Stays quiet</b><span>It never sends a notification</span></span></div>
+  </div>
+
+  <section>
+    <h2>You don't play it. You just work.</h2>
+    <p class="sub">Every pet game eventually asks for something. This one doesn't.</p>
+    <div class="rail">
+      <div class="card">
+        <div class="icon">📈</div>
+        <h3>Levels from real work</h3>
+        <p>Every tool call, prompt and long session feeds it. Level, class, six stats and
+          a skill tree — all derived, never handed out. The same log always produces the
+          same level.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🪪</div>
+        <h3>It renames itself</h3>
+        <p>Four axes read how you work — not what you write — and the name follows.
+          Alchemist one fortnight, Puppeteer the next. Change how you work and it changes
+          within a week or two.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚔️</div>
+        <h3>Fights without you</h3>
+        <p>A bout every two hours against someone its own size. Nothing to press. You just
+          catch it happening and read what went down.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🗝️</div>
+        <h3>Goes down alone</h3>
+        <p>It delves while you're away and comes back with gear. The best item in each
+          slot equips itself — no loadout screen, because then you'd be farming.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🩹</div>
+        <h3>Comes home scraped up</h3>
+        <p>Lose a bout and it turns up with a plaster on its cheek. It heals on its own in
+          an hour. There's no button to help it, and it isn't any weaker meanwhile.</p>
+      </div>
+      <div class="card">
+        <div class="icon">💤</div>
+        <h3>Dreams about it later</h3>
+        <p>Asleep, it mutters about the floors it reached and the trades it used to hold.
+          The longer you're together, the more it has to dream about.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>See it in action</h2>
+    <p class="sub">The phone view is read-only, and it's served by your own machine.</p>
+    <div class="shots">
+      <div class="phone"><img src="shots/home.png" alt="Maite on a phone: level 34, a two-week bar chart, and the four axes its name comes from" /></div>
+      <div class="phone"><img src="shots/stats.png" alt="Six stats against the average pet at your level, and the skills it has grown" /></div>
+      <div class="phone"><img src="shots/dungeon.png" alt="Floor 51 of the dungeon: the gear it is wearing, what it picked up on the way down, and the bosses still ahead" /></div>
+      <div class="phone"><img src="shots/away.png" alt="What it brought back while you were away, and the latest bout" /></div>
+    </div>
+    <p class="shot-note">Real screens, not mockups — regenerated straight from the app.</p>
+  </section>
+
+  <section id="privacy">
+    <h2>It reads none of your work</h2>
+    <p class="sub">One line per event, on your own machine. This is the whole record.</p>
+    <div class="card">
+      <pre><code>{"t":1786659596374,"e":"PostToolUse",
+ "s":"63528a31","p":"fa748169",
+ "tool":"Bash","ok":true}</code></pre>
+      <p style="margin:16px 0 0;color:var(--ink-soft);font-size:15.5px">
+        <code>s</code> and <code>p</code> are the first 8 characters of a SHA-1 of the
+        session id and the working directory. All it needs is "same or different", so the
+        plaintext is never kept.
+      </p>
+      <p style="margin:16px 0 4px;font-weight:700">Never recorded, not once:</p>
+      <ul class="kill">
+        <li>Prompt text, and anything you or Claude said</li>
+        <li>Tool arguments, commands, and their output</li>
+        <li>File paths, repository names, hostnames</li>
+      </ul>
+      <p style="margin:16px 0 0;color:var(--ink-soft);font-size:15.5px">
+        Configure nothing and it never touches the network. Turn on sync and that one line
+        goes to <em>your own</em> Cloudflare account — you deploy the server yourself, and
+        the content was never in the line to begin with.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Three steps, then forget about it</h2>
+    <p class="sub">That's genuinely it.</p>
+    <div class="steps">
+      <div class="card step">
+        <div class="n">1</div>
+        <h3>Install the hook</h3>
+        <p>One command. It appends a line per event and exits — it never blocks Claude Code,
+          and never waits on the network.</p>
+      </div>
+      <div class="card step">
+        <div class="n">2</div>
+        <h3>Leave it running</h3>
+        <p>A small window in the corner. It naps, stretches, and a cat wanders past when
+          your hands are still.</p>
+      </div>
+      <div class="card step">
+        <div class="n">3</div>
+        <h3>Look over sometimes</h3>
+        <p>Come back after a few hours and it tells you what it got up to. That's the
+          whole loop.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The $1 key</h2>
+    <p class="sub">You're buying reach. Never experience points.</p>
+    <div class="card">
+      <p style="margin:0 0 14px;color:var(--ink-soft);font-size:15.5px">
+        Claude Code already keeps a transcript of every session you've ever had. Maite can
+        fold those in, so you start from the level you actually earned rather than zero.
+      </p>
+      <div class="price-row"><span class="price">Free</span><em>the last 30 days of your transcripts</em></div>
+      <div class="price-row" style="margin-top:10px"><span class="price">$1</span><em>30 more days of reach. Keys stack.</em></div>
+      <p style="margin:18px 0 0;color:var(--ink-soft);font-size:15.5px">
+        A key widens the window the importer may look back through — nothing else. The
+        growth rules are identical for everyone, and the same log always produces the same
+        level.
+      </p>
+      <p style="margin:14px 0 0;font-weight:700">
+        So a key is worth exactly as much work as you actually did. Took the month off? A
+        key gets you zero.
+      </p>
+    </div>
+  </section>
+
+  <div class="closing">
+    <h2>Your logs are already there.</h2>
+    <p>They may as well be raising something. Free, MIT licensed, and it works on Windows,
+      macOS and Linux.</p>
+    <a class="btn" href="https://github.com/maite-app/maite">Get Maite on GitHub</a>
+  </div>
+
+  <footer>
+    <div class="foot-top">
+      <svg aria-hidden="true"><use href="#maite"/></svg>
+      <b>Maite</b>
+    </div>
+    <nav>
+      <a href="https://github.com/maite-app/maite">GitHub</a>
+      <a href="https://github.com/maite-app/maite/issues">Support</a>
+      <a href="#privacy">Privacy</a>
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    </nav>
+    <p style="margin:0">Made for people who already have the logs. MIT licensed.</p>
+  </footer>
+
+</div>
+</body>
+</html>

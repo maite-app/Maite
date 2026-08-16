@@ -1,0 +1,16 @@
+node_modules/
+dist/
+out/
+*.log
+.DS_Store
+.env
+.env.*
+
+# 署名の対（scripts/license.mjs init）。**秘密鍵をリポジトリに入れない**
+# ── 既定の書き出し先はリポジトリの外（~/.aipet-signing/）だが、
+# うっかり中に置いたときの保険として。
+*.pem
+license-private*
+scripts/win/watchdog.log
+docs/HANDOFF.md
+scripts/prepare-public.mjs

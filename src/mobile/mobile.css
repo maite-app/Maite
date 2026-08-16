@@ -1,0 +1,1089 @@
+/* pet.css（オーバーレイ用）を先に読んでいるので、ここでページ用に上書きする。 */
+
+/*
+ * pet.css は色のトークンを #stage の中だけに置いている（オーバーレイには
+ * キャラしか無いので足りる）。このページはキャラの外にも系統色を使うので、
+ * ページ全体に届くよう :root にも同じトークンを持たせる。
+ */
+:root {
+  --hue: 220;
+  --sat: 12%;
+  --body: hsl(var(--hue) var(--sat) 62%);
+}
+
+html,
+body {
+  background: #12141a;
+  color: #e8ecf4;
+  overflow: auto;
+  cursor: default;
+}
+
+main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
+}
+
+/* オーバーレイでは絶対配置の 200x200 だが、ここでは中央に置く箱として使う */
+#stage {
+  margin: 0 auto;
+  --hue: 220;
+  --sat: 12%;
+}
+
+h1 {
+  margin: 4px 0 2px;
+  font-size: 34px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+#subtitle {
+  margin: 0 0 22px;
+  text-align: center;
+  font-size: 15px;
+  color: hsl(var(--hue) 40% 70%);
+  font-weight: 600;
+}
+
+.meter {
+  margin-bottom: 26px;
+}
+
+.meter-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #232833;
+  overflow: hidden;
+}
+
+.meter-bar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: var(--body);
+  transition: width 0.6s ease;
+}
+
+.meter-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 12px;
+  color: #8b95a8;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: #1a1e27;
+  border: 1px solid #262c38;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7c8699;
+  text-transform: uppercase;
+}
+
+/*
+ * 束の名前。**節の見出しより格を上に見せる** ── 同じ大きさだと、
+ * 束なのか節なのかが読めない。左の線で「ここから下がひとまとまり」を出す。
+ */
+.group-head {
+  margin: 26px 0 10px;
+  padding-left: 10px;
+  border-left: 2px solid hsl(var(--hue) 45% 46%);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #aeb8c9;
+}
+
+/* いちばん上だけは詰める（:first-of-type だと #subtitle に取られる） */
+.meter + .group-head {
+  margin-top: 18px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 15px;
+}
+
+.row span {
+  color: #a8b2c4;
+}
+
+.row b {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * 注記つきの行。**数字の下に「何を数えたか」を敷く。**
+ * flex のままだと注記が横に並んでしまうので、ここだけ格子に組み替える。
+ */
+.row.has-note {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  align-items: baseline;
+}
+
+.row.has-note > b {
+  grid-column: 2;
+  justify-self: end;
+}
+
+/*
+ * 2 行目は左に注記、右に添え数字（「平均の 1.3 倍」）。**行を明示的に置く**
+ * ── 自動配置に任せると添え数字が 2 行目、注記が 3 行目に落ちて、1 行のはずの
+ * ものが 3 行ぶんの高さになる。
+ */
+.row-sub {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  font-style: normal;
+  font-size: 11px;
+  color: hsl(var(--hue) 40% 62%);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.row-note {
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 1px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #7b8496;
+}
+
+/* ---- おぼえた技 ---- */
+.skills {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skill {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  column-gap: 8px;
+  align-items: baseline;
+  font-size: 15px;
+}
+
+.skill b {
+  font-weight: 700;
+}
+
+.skill i {
+  font-style: normal;
+  color: var(--body);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+/* 次の段位まであと何回。数字は右端に寄せて、名前の並びを乱さない */
+.skill em {
+  justify-self: end;
+  font-style: normal;
+  font-size: 12px;
+  color: #7c8699;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* いま実際に効いている数字。**効き目のほうが本体**なので、説明より目立たせる */
+.skill span.is-effect {
+  color: hsl(140 50% 68%);
+  font-weight: 700;
+}
+
+/* 説明は全列ぶち抜きの 2 行目。名前と星の下にぶら下げる */
+.skill span {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #8b95a8;
+  line-height: 1.5;
+}
+
+/* まだ生えていない技。「何をすれば生えるか」だけ見せる */
+.skill.locked b,
+.skill.locked i {
+  color: #5d6675;
+}
+
+/* ---- 働き方の内訳 ---- */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 4.5em 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+  font-size: 14px;
+}
+
+.bar b {
+  font-weight: 700;
+}
+
+.bar i {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: #232833;
+  overflow: hidden;
+}
+
+.bar i span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.bar em {
+  font-style: normal;
+  font-size: 12px;
+  color: #8b95a8;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 渡り歩いた職 ---- */
+.jobs-note {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #8b95a8;
+}
+
+.jobs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* 通ってきた順に左から。いまの名前が最後に来る */
+.job {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--hue) var(--sat) 40%);
+  background: hsl(var(--hue) var(--sat) 20% / 0.35);
+  font-size: 13px;
+  font-weight: 700;
+  color: hsl(var(--hue) var(--sat) 76%);
+}
+
+.job em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  color: #6f7a8c;
+}
+
+/* その職としての位。名前の隣に置く ── 全体のレベルとは別物 */
+.job-level {
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 800;
+  color: hsl(var(--hue) 55% 72%);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 型 ---- */
+.panel h2 #persona-code {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6f7a8c;
+}
+
+.persona-name {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: hsl(var(--hue) var(--sat) 72%);
+}
+
+.axes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: 5.5em 1fr 5.5em;
+  align-items: center;
+  column-gap: 8px;
+  font-size: 13px;
+}
+
+.axis b {
+  font-weight: 400;
+  color: #6f7a8c;
+}
+
+/* 寄っているほうだけ明るくする。両方同じ濃さだと、どっちの人か読めない */
+.axis b.on {
+  font-weight: 700;
+  color: var(--body);
+}
+
+.axis b:last-of-type {
+  text-align: right;
+}
+
+.axis i {
+  position: relative;
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: #232833;
+}
+
+/* 目盛りの真ん中が境目。端に寄るほど、その傾向が強い */
+.axis i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 1px;
+  height: 10px;
+  background: #39404e;
+}
+
+.axis i span {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: hsl(var(--hue) var(--sat) 66%);
+  transform: translateY(-50%);
+  transition: left 0.5s ease;
+}
+
+/* 寄っているほうの意味。**軸の名前より、こちらのほうが先に読まれていい** */
+.axis-meaning {
+  grid-column: 1 / -1;
+  margin-top: 5px;
+  text-decoration: none;
+  font-size: 12.5px;
+  color: #c2cbd9;
+}
+
+.axis-meaning:empty {
+  display: none;
+}
+
+.axis em {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 11px;
+  color: #5d6675;
+}
+
+/* 5 軸目（リズム）は 4 文字の後ろに付くぶん。線で切って別物に見せる */
+.axis.suffix {
+  padding-top: 12px;
+  border-top: 1px solid #232833;
+}
+
+/* まだ母数が足りない軸は、そう見えるように薄くする */
+.axis.unknown {
+  opacity: 0.4;
+}
+
+/* ---- ここ 2 週間 ---- */
+.trail {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 3px;
+  height: 76px;
+}
+
+.trail-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.trail-day i {
+  display: block;
+  width: 100%;
+  max-width: 18px;
+  border-radius: 3px;
+  background: hsl(var(--hue) var(--sat) 62%);
+  transition: height 0.5s ease;
+}
+
+/* 働かなかった日も列を残す。詰めると休んだ日が無かったことになる */
+.trail-day.is-empty i {
+  background: #232833;
+}
+
+/* 今日だけ縁を付ける。色を変えるより、位置が分かるほうが要る */
+.trail-day.is-today i {
+  outline: 1px solid hsl(var(--hue) var(--sat) 78%);
+  outline-offset: 1px;
+}
+
+.trail-day em {
+  font-style: normal;
+  font-size: 10px;
+  color: #6f7a8c;
+  font-variant-numeric: tabular-nums;
+}
+
+.trail-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #8b95a8;
+}
+
+/* ---- 実績 ---- */
+.panel h2 span {
+  color: var(--body);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * **獲った称号は 2 列に敷く。** 26 個を説明つきで縦に並べると、それだけで
+ * 画面の半分が称号になる。名前と日付だけ見せて、読みたいものだけ開く。
+ */
+.achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 6px;
+}
+
+.achievement {
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #1b2029;
+  font-size: 14px;
+}
+
+.achievement summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  cursor: pointer;
+  /* 既定の三角は出さない（2 列に並ぶので、印より詰まっているほうが読みやすい） */
+  list-style: none;
+}
+
+.achievement summary::-webkit-details-marker {
+  display: none;
+}
+
+.achievement b {
+  font-weight: 700;
+  /* 名前は途中で折らない。「はじめの一 / 歩」になると読めない */
+  word-break: keep-all;
+}
+
+.achievement time {
+  font-size: 11px;
+  color: #7c8699;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.achievement > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #8b95a8;
+  line-height: 1.55;
+}
+
+/*
+ * うまくいかなかったほう。**沈めるのではなく、別の色にする**
+ * ── 薄くすると「劣ったもの」に見えるが、これは並びとしては同じ重さ。
+ */
+.achievement.rough {
+  background: hsl(20 18% 17%);
+}
+.achievement.rough b {
+  color: hsl(20 60% 76%);
+}
+
+/* まだのものは名前だけ、まとめて 1 行。説明も進捗も付けない */
+.achievement-rest {
+  grid-column: 1 / -1;
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #5d6675;
+}
+
+/* ---- 留守のあいだに ---- */
+.finds {
+  display: flex;
+  /* 2 行になったので横並びをやめる。丸い札のままだと注記が折り返せない */
+  flex-direction: column;
+  gap: 8px;
+}
+
+/*
+ * 拾い物。**名前 + 相棒の観察記録の 2 行。**
+ *
+ * 名前だけを丸い札で並べていたが、それだと「へえ」で終わる ── 面白いのは
+ * 大層な名前のほうではなく、**それが何か知らないまま真面目に観察している落差**
+ * （ピクミンのお宝の書き方）。一言のほうが本体なので、札をやめて行にした。
+ */
+.find {
+  display: block;
+  width: 100%;
+  padding: 9px 13px;
+  border-radius: 10px;
+  background: #232833;
+  font-size: 13px;
+  color: #c3ccdb;
+}
+
+.find b {
+  display: block;
+  font-weight: 600;
+}
+
+.find small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #8b93a5;
+}
+
+
+/* ---- 今日の一戦 ---- */
+.battle-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.battle-result {
+  font-weight: 800;
+  white-space: nowrap;
+}
+.battle-result.you {
+  color: hsl(140 60% 62%);
+}
+.battle-result.foe {
+  color: hsl(0 60% 66%);
+}
+.battle-result.draw {
+  color: #8b95a8;
+}
+
+/* 手応え。相手の強さは数字で出さないので、ここが唯一の物差しになる */
+.battle-impression {
+  margin: -4px 0 12px;
+  font-size: 13px;
+  color: #a8b2c4;
+}
+
+.battle-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a8b2c4;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 決着の行だけは目で拾えるようにする */
+.battle-log li:last-child {
+  color: #e8ecf4;
+  font-weight: 700;
+}
+
+.battle-note {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: #5d6675;
+  line-height: 1.5;
+}
+
+#battle-panel.empty .battle-top {
+  margin-bottom: 0;
+  color: #8b95a8;
+}
+
+#foot {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: #5d6675;
+  line-height: 1.6;
+}
+
+/* 通信が切れたら黙って古い数字を出し続けるのではなく、はっきり見せる */
+body.stale main {
+  opacity: 0.45;
+  transition: opacity 0.3s ease;
+}
+
+/* ---- 六角形の能力値 ---- */
+/*
+ * **形が読めることを優先する。** 真ん中の輪（is-average）が「同じレベルの
+ * 平均」で、そこから外に出ているところがこの子の得意。数字だけ並べても、
+ * それが高いのか低いのかは分からない。
+ */
+.hex {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  /*
+   * **縦を明示する。** viewBox しか無い SVG の高さの決め方はブラウザで揃って
+   * いなくて、既定の 150px に落ちると図が潰れる。比を書いておけばどこでも同じ。
+   */
+  aspect-ratio: 200 / 190;
+  height: auto;
+  margin: 0 auto 10px;
+  overflow: visible;
+}
+
+/* 節が転けたときだけ出る。**黙って消えるより、理由が出ているほうがいい** */
+.panel-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: hsl(6 70% 70%);
+  word-break: break-word;
+}
+
+.hex-ring {
+  fill: none;
+  stroke: #2a3040;
+  stroke-width: 1;
+}
+
+/* 平均の輪だけ少し濃く。ここを基準に「外に出ている / 凹んでいる」を読む */
+.hex-ring.is-average {
+  stroke: #3d4557;
+  stroke-dasharray: 3 3;
+}
+
+.hex-spoke {
+  stroke: #232a38;
+  stroke-width: 1;
+}
+
+.hex-shape {
+  fill: hsl(var(--hue) 55% 55% / 0.28);
+  stroke: hsl(var(--hue) 65% 62%);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  /* 伸び縮みが見えるように。跳ねさせない ── 常駐の画面で暴れると疲れる */
+  transition: points 0.6s ease;
+}
+
+.hex-label {
+  fill: #8b93a5;
+  font-size: 12px;
+  font-weight: 700;
+  transition: fill 0.4s ease;
+}
+
+/* 上がったところは緑、下がったところは赤。数秒で戻る */
+.hex-label.up,
+.row.up b {
+  fill: hsl(140 62% 62%);
+  color: hsl(140 62% 62%);
+}
+
+.hex-label.down,
+.row.down b {
+  fill: hsl(0 62% 66%);
+  color: hsl(0 62% 66%);
+}
+
+.row.up b::after {
+  content: ' ▲';
+  font-size: 10px;
+}
+
+.row.down b::after {
+  content: ' ▼';
+  font-size: 10px;
+}
+
+/* ---- ダンジョン ---- */
+#dungeon-floor {
+  color: hsl(var(--hue) 60% 70%);
+  font-variant-numeric: tabular-nums;
+}
+
+.gear {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.gear-item {
+  display: grid;
+  grid-template-columns: 22px 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #1b2029;
+  font-size: 13px;
+}
+
+/* 枠（攻・守・速）の 1 文字 */
+.gear-item i {
+  font-style: normal;
+  font-weight: 800;
+  color: #6f7889;
+  text-align: center;
+}
+
+.gear-item b {
+  font-weight: 600;
+  color: #e2e8f2;
+}
+
+.gear-item em {
+  font-style: normal;
+  font-size: 11px;
+  color: #8b93a5;
+}
+
+.gear-item span {
+  font-weight: 800;
+  color: hsl(140 55% 66%);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* 宿り ── 装備の中身。ぶら下げて、装備の一部だと分かるようにする */
+.imbue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: -2px 0 0 30px;
+  padding: 3px 10px;
+  border-left: 2px solid #2f3644;
+  font-size: 12px;
+}
+
+.imbue b {
+  font-weight: 700;
+  color: hsl(280 45% 76%);
+  white-space: nowrap;
+}
+
+.imbue span {
+  color: #7d8697;
+}
+
+/*
+ * 位の色。**灰 → 緑 → 青 → 紫 → 金**。
+ *
+ * 呼び名（コモン〜レジェンド）を読まなくても、色だけで上下が分かる並びにする
+ * ── ゲームで何十年も使われている順番なので、説明が要らない。
+ * 系統色（--hue）には寄せない。系統で色が変わると、位の色が人によって別物になる。
+ */
+:root {
+  --r-uncommon: 145;
+  --r-rare: 210;
+  --r-mystic: 285;
+  --r-legend: 42;
+}
+
+.gear-item.r-uncommon {
+  background: hsl(var(--r-uncommon) 22% 17%);
+}
+.gear-item.r-uncommon b,
+.gear-item.r-uncommon em {
+  color: hsl(var(--r-uncommon) 55% 74%);
+}
+
+.gear-item.r-rare {
+  background: hsl(var(--r-rare) 32% 20%);
+}
+.gear-item.r-rare b,
+.gear-item.r-rare em {
+  color: hsl(var(--r-rare) 75% 80%);
+}
+
+.gear-item.r-mystic {
+  background: hsl(var(--r-mystic) 32% 21%);
+}
+.gear-item.r-mystic b,
+.gear-item.r-mystic em {
+  color: hsl(var(--r-mystic) 70% 82%);
+}
+
+/* いちばん上だけ縁を光らせる。**ここだけは拾った瞬間に気づいてほしい** */
+.gear-item.r-legend {
+  background: hsl(var(--r-legend) 38% 20%);
+  box-shadow: inset 0 0 0 1px hsl(var(--r-legend) 65% 46%);
+}
+.gear-item.r-legend b,
+.gear-item.r-legend em {
+  color: hsl(var(--r-legend) 88% 76%);
+}
+
+/* 拾い物の粒も同じ色で。並べたときに、良い日かどうかが一目で分かる */
+.find.r-uncommon {
+  background: hsl(var(--r-uncommon) 24% 22%);
+  color: hsl(var(--r-uncommon) 55% 78%);
+}
+.find.r-rare {
+  background: hsl(var(--r-rare) 36% 25%);
+  color: hsl(var(--r-rare) 78% 84%);
+  font-weight: 700;
+}
+.find.r-mystic {
+  background: hsl(var(--r-mystic) 36% 26%);
+  color: hsl(var(--r-mystic) 72% 85%);
+  font-weight: 700;
+}
+.find.r-legend {
+  background: hsl(var(--r-legend) 42% 24%);
+  color: hsl(var(--r-legend) 90% 80%);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px hsl(var(--r-legend) 65% 48%);
+}
+
+/* 拾った階を、小さく後ろに添える */
+#dungeon-finds .find em {
+  font-style: normal;
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* ---- 抜けてきた主 ---- */
+/*
+ * **通過点であって、集めるものではない。** まだ会っていない主は出さないので、
+ * ここは「そこまで潜った」の言い換えでしかない。並びは新しい順。
+ */
+.bosses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.boss {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 4px 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #191d26;
+  font-size: 13px;
+}
+
+/* 階の数字。ここが道の目盛りになる */
+.boss i {
+  grid-row: 1 / 3;
+  align-self: center;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 15px;
+  text-align: right;
+  color: hsl(var(--hue) 55% 62%);
+  font-variant-numeric: tabular-nums;
+}
+
+.boss b {
+  font-weight: 700;
+  color: #dfe5f0;
+}
+
+.boss span {
+  font-size: 11px;
+  color: #798193;
+}
+
+/* ------------------------------------------------------------------ *
+ * 目次（左カラム）
+ *
+ * 節が 11 個まで増えて、縦スクロールだけでは端から端まで遠くなった。
+ * **中身は隠さない** ── ここは飛ぶための目次で、節を畳んだり切り替えたり
+ * はしない（隠すと「そこに何があるか」が消える）。
+ * ------------------------------------------------------------------ */
+.menu-button {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  z-index: 30;
+  display: grid;
+  gap: 4px;
+  width: 42px;
+  height: 42px;
+  padding: 11px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: hsl(var(--hue) 18% 16% / 0.82);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  /* 指で押せる大きさ。40px を切ると押し損ねる */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-button span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: hsl(var(--hue) 30% 82%);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* 開いている間は × に */
+.menu-button[aria-expanded='true'] span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.menu-button[aria-expanded='true'] span:nth-child(2) {
+  opacity: 0;
+}
+.menu-button[aria-expanded='true'] span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #0b0d12cc;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 25;
+  width: min(74vw, 260px);
+  padding: calc(64px + env(safe-area-inset-top)) 0 24px;
+  background: #171b23;
+  border-right: 1px solid #252b37;
+  /* 閉じている間は左に逃がす。display:none にすると開く動きが出ない */
+  transform: translateX(-102%);
+  transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-head {
+  padding: 0 18px 14px;
+  border-bottom: 1px solid #252b37;
+  margin-bottom: 8px;
+}
+
+.drawer-head b {
+  display: block;
+  font-size: 16px;
+  color: #e8ecf4;
+}
+
+.drawer-head em {
+  font-style: normal;
+  font-size: 12px;
+  color: hsl(var(--hue) 55% 68%);
+  font-variant-numeric: tabular-nums;
+}
+
+.drawer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.drawer a {
+  display: block;
+  padding: 13px 18px;
+  color: #c3ccdb;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.drawer a:active {
+  background: hsl(var(--hue) 30% 22%);
+}
+
+/* 束の名前。ここは飛び先ではないので、押せるように見せない */
+.drawer-group {
+  padding: 14px 18px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #5d6677;
+}
+
+.drawer-group:first-child {
+  padding-top: 4px;
+}
+
+/* 目次の中身は画面の外に出さない ── 開いたときに全部見えるようにする */
+@media (max-height: 560px) {
+  .drawer a {
+    padding: 9px 18px;
+  }
+
+  .drawer-group {
+    padding: 9px 18px 3px;
+  }
+}
+
+/* ボタンのぶんだけ、頭を空ける（キャラと重ならないように） */
+main {
+  padding-top: calc(58px + env(safe-area-inset-top));
+}

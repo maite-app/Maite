@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#12141a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- 読み込むまで職は分からない。決まったら mobile.js が名前に差し替える -->
+    <title>見習い</title>
+    <link rel="stylesheet" href="/pet.css" />
+    <link rel="stylesheet" href="/mobile.css" />
+  </head>
+  <body>
+    <!--
+      左カラム。**節が 11 個まで増えて、縦スクロールだけでは端から端まで
+      遠くなった** ── 見たいのが「今日」なのか「ダンジョン」なのかで、
+      毎回スクロールし直すことになる。
+
+      中身はページに全部あるまま。ここは飛ぶための目次で、節を隠したり
+      切り替えたりはしない ── 隠すと「そこに何があるか」が消える。
+    -->
+    <button id="menu-open" class="menu-button" aria-label="目次" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="scrim" class="scrim" hidden></div>
+    <nav id="drawer" class="drawer" aria-hidden="true">
+      <p class="drawer-head"><b id="drawer-name">Maite</b><em id="drawer-level"></em></p>
+      <ul id="drawer-list"></ul>
+    </nav>
+
+    <main>
+      <div id="stage" class="mood-idle">
+        <div id="pet-mount"></div>
+      </div>
+
+      <h1 id="title">Lv1</h1>
+      <p id="subtitle">見習い</p>
+
+      <div class="meter">
+        <div class="meter-bar"><i id="meter-fill"></i></div>
+        <div class="meter-labels">
+          <span id="meter-into">0</span>
+          <span id="meter-next">次まで 60</span>
+        </div>
+      </div>
+
+      <!--
+        **節を 5 つの束に分ける。** 11 枚が同じ重さで縦に並んでいると、
+        どこから読めばいいのか分からない ── 「いま」「この子のこと」
+        「できること」「できごと」「記録」の順で、手前から奥へ降りていく。
+        束の名前は data-group で、目次にも同じ切れ目が出る。
+      -->
+      <p class="group-head" data-t="group.now">いま</p>
+
+      <section class="panel" data-sec="today" data-group="now">
+        <h2><span data-t="panel.today">今日</span></h2>
+        <div class="rows">
+          <div class="row"><span data-t="row.dailyExp">今日の経験値</span><b id="daily-exp">0</b></div>
+          <div class="row"><span data-t="row.mood">ようす</span><b id="mood">─</b></div>
+        </div>
+      </section>
+
+      <section class="panel" data-sec="trail" data-group="now">
+        <h2><span data-t="panel.trail">この 2 週間</span> <span id="trail-total"></span></h2>
+        <div class="trail" id="trail"></div>
+        <p class="trail-note" id="trail-note"></p>
+      </section>
+
+      <p class="group-head" data-t="group.self">この子のこと</p>
+
+      <section class="panel" data-sec="name" data-group="self">
+        <h2><span data-t="panel.name">この名の由来</span> <span id="persona-code"></span></h2>
+        <p id="persona-name" class="persona-name">見極め中</p>
+        <p id="persona-blurb" class="trail-note"></p>
+        <div class="axes" id="persona-axes"></div>
+        <p id="persona-note" class="battle-note"></p>
+      </section>
+
+      <section class="panel" data-sec="style" data-group="self">
+        <h2><span data-t="panel.style">流儀</span></h2>
+        <div class="bars" id="bars"></div>
+        <p class="battle-impression" id="chasing"></p>
+        <div class="rows" id="rates"></div>
+      </section>
+
+      <p class="group-head" data-t="group.power">できること</p>
+
+      <section class="panel" data-sec="hexagon" data-group="power">
+        <h2><span data-t="panel.hexagon">能力値</span></h2>
+        <svg class="hex" id="hex" viewBox="0 0 200 190" aria-hidden="true">
+          <g id="hex-grid"></g>
+          <polygon class="hex-shape" id="hex-shape" points="" />
+          <g id="hex-labels"></g>
+        </svg>
+        <div class="rows" id="hex-rows"></div>
+        <p class="battle-note" data-t="hex.note"></p>
+      </section>
+
+      <section class="panel" data-sec="skills" data-group="power">
+        <h2><span data-t="panel.skills">覚えた技</span></h2>
+        <div class="skills" id="skills"></div>
+      </section>
+
+      <p class="group-head" data-t="group.events">できごと</p>
+
+      <section class="panel" id="dungeon-panel" data-sec="dungeon" data-group="events">
+        <h2><span data-t="panel.dungeon">迷宮</span> <span id="dungeon-floor"></span></h2>
+        <p class="jobs-note" data-t="dungeon.equipped">身に着けているもの</p>
+        <div class="gear" id="dungeon-gear"></div>
+        <p class="jobs-note" data-t="dungeon.recent">近ごろの拾い物</p>
+        <div class="finds" id="dungeon-finds"></div>
+        <p class="jobs-note" id="bosses-note" data-t="dungeon.bosses">討ち果たした主</p>
+        <div class="bosses" id="bosses"></div>
+        <p class="battle-note" data-t="dungeon.note"></p>
+      </section>
+
+      <section class="panel" id="battle-panel" data-sec="battle" data-group="events">
+        <h2><span data-t="panel.battle">直近の一戦</span></h2>
+        <div class="battle-top">
+          <span id="battle-head">─</span>
+          <b class="battle-result" id="battle-result"></b>
+        </div>
+        <p class="battle-impression" id="battle-impression"></p>
+        <ol class="battle-log" id="battle-log"></ol>
+        <p class="battle-note" id="battle-note"></p>
+      </section>
+
+      <section class="panel" id="expedition-panel" hidden data-sec="expedition" data-group="events">
+        <h2><span data-t="panel.expedition">留守のあいだ</span></h2>
+        <p class="battle-impression" id="expedition-head"></p>
+        <div class="finds" id="finds"></div>
+      </section>
+
+      <p class="group-head" data-t="group.record">記録</p>
+
+      <section class="panel" data-sec="achievements" data-group="record">
+        <h2><span data-t="panel.achievements">称号</span> <span id="achievement-count"></span></h2>
+        <p class="jobs-note" id="jobs-note"></p>
+        <div class="jobs" id="jobs"></div>
+        <div class="achievements" id="achievements"></div>
+      </section>
+
+      <section class="panel" data-sec="recap" data-group="record" id="recap-panel" hidden>
+        <h2><span data-t="panel.recap">ひと月のふりかえり</span> <span id="recap-span"></span></h2>
+        <div class="rows" id="recap-rows"></div>
+        <p class="dungeon-note" id="recap-note"></p>
+      </section>
+
+      <section class="panel" data-sec="history" data-group="record">
+        <h2><span data-t="panel.history">歩み</span></h2>
+        <div class="rows" id="traits"></div>
+      </section>
+
+      <p id="foot" data-t="foot">読み取り専用 · このページは自分の PC が配信しています</p>
+    </main>
+
+    <script src="/pet-svg.js"></script>
+    <!-- しぐさはオーバーレイと同じもの（src/shared/gestures.js） -->
+    <script src="/gestures.js"></script>
+    <script src="/mobile.js"></script>
+  </body>
+</html>

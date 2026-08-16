@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>見習い</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="stage" class="mood-sleeping">
+      <!-- 絵は src/shared/pet-svg.js から差し込む（スマホ用ページと共通） -->
+      <div id="pet-mount"></div>
+
+      <div id="bubble"><span id="bubble-text"></span></div>
+
+      <div id="badge">
+        <span id="badge-level">Lv1</span>
+        <span id="badge-class"></span>
+        <div id="bar"><i id="bar-fill"></i></div>
+      </div>
+    </div>
+
+    <script src="../shared/pet-svg.js"></script>
+    <script src="../shared/gestures.js"></script>
+    <script src="pet.js"></script>
+  </body>
+</html>
