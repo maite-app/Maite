@@ -7,7 +7,7 @@
  */
 window.AIPET_SVG = `
 <svg id="pet" viewBox="0 14 200 200" aria-hidden="true">
-  <ellipse id="shadow" cx="100" cy="168" rx="42" ry="8" />
+  <ellipse id="shadow" cx="100" cy="168" rx="44" ry="7.5" />
 
   <!-- オーラは体より奥。creature より前に置くと胴体を横切る -->
   <g id="aura">
@@ -97,18 +97,18 @@ window.AIPET_SVG = `
 
     <!-- Lv3 で生える触角。系統が確定した合図でもある -->
     <g id="antenna">
-      <path d="M100 92 Q 96 68 108 56" />
-      <circle cx="110" cy="53" r="7" />
+      <path d="M100 88 Q 95 62 108 52" />
+      <circle cx="110" cy="49" r="6.5" />
     </g>
 
     <!-- Lv10 で乗る冠 -->
     <g id="crown">
-      <path d="M74 74 L82 52 L100 66 L118 52 L126 74 Z" />
+      <path d="M76 78 L83 58 L100 70 L117 58 L124 78 Z" />
     </g>
 
     <path
       id="body"
-      d="M100 78 C 138 78 156 106 156 130 C 156 154 132 166 100 166 C 68 166 44 154 44 130 C 44 106 62 78 100 78 Z"
+      d="M 100 82 C 142 82 156 108 156 134 C 156 156 130 166 100 166 C 70 166 44 156 44 134 C 44 108 58 82 100 82 Z"
     />
 
     <!--
@@ -118,9 +118,12 @@ window.AIPET_SVG = `
       顔より奥・体より手前。顔に掛けると、型（persona.js）が決める目つきと
       口元が模様に埋もれる ── **顔つきはスキンで買えない**（§8c）。
     -->
+    <!-- 体の上のつや。丸みを 1 枚で出す（クラスで色を付ける ── 直書きしない） -->
+    <path id="sheen" d="M 72 92 C 85 87 115 87 128 92 C 115 84 85 84 72 92 Z" />
+
     <g id="skin-texture" clip-path="url(#body-clip)">
       <clipPath id="body-clip">
-        <path d="M100 78 C 138 78 156 106 156 130 C 156 154 132 166 100 166 C 68 166 44 154 44 130 C 44 106 62 78 100 78 Z" />
+        <path d="M 100 82 C 142 82 156 108 156 134 C 156 156 130 166 100 166 C 70 166 44 156 44 134 C 44 108 58 82 100 82 Z" />
       </clipPath>
 
       <!-- 墨：紙目のような細い縞 -->
@@ -151,24 +154,24 @@ window.AIPET_SVG = `
     </g>
 
     <g id="face">
-      <g class="eye" transform="translate(82 122)">
-        <circle class="eyeball" r="9" />
-        <circle class="pupil" r="4" />
+      <g class="eye" transform="translate(78 128)">
+        <circle class="eyeball" r="10.5" />
+        <circle class="pupil" r="4.5" />
         <!--
           光。**これ 1 個で顔つきが変わる** ── 瞳が真っ黒のままだと、
           どんなに形を丸くしても「点」に見える。左上に寄せるのは、
           そこに光源があると読ませるため（両目とも同じ側に置く）。
         -->
-        <circle class="glint" cx="-2.6" cy="-2.6" r="1.9" />
-        <path class="lid" d="M-10 0 Q 0 6 10 0" />
+        <circle class="glint" cx="-2.8" cy="-2.8" r="2.1" />
+        <path class="lid" d="M-11 0 Q 0 7 11 0" />
       </g>
-      <g class="eye" transform="translate(118 122)">
+      <g class="eye" transform="translate(122 128)">
         <circle class="eyeball" r="9" />
         <circle class="pupil" r="4" />
         <circle class="glint" cx="-2.6" cy="-2.6" r="1.9" />
         <path class="lid" d="M-10 0 Q 0 6 10 0" />
       </g>
-      <path id="mouth" d="M92 142 Q 100 149 108 142" />
+      <path id="mouth" d="M94 145 Q 100 149 106 145" />
 
       <!--
         頬の赤み。**顔つきは型が決める**ので、形には触らない ── 色を薄く
@@ -176,8 +179,8 @@ window.AIPET_SVG = `
         ほとんど出ない（無彩色の子に頬紅だけ乗ると浮く）。
       -->
       <g id="blush">
-        <ellipse cx="66" cy="136" rx="9" ry="5.5" />
-        <ellipse cx="134" cy="136" rx="9" ry="5.5" />
+        <ellipse cx="72" cy="138" rx="8" ry="4.5" />
+        <ellipse cx="128" cy="138" rx="8" ry="4.5" />
       </g>
     </g>
 
@@ -221,9 +224,9 @@ window.AIPET_SVG = `
 
       <!-- 目元 ── 眼鏡は学者、サングラスは夜目から -->
       <g class="worn" id="ac-glasses">
-        <circle class="rim" cx="82" cy="122" r="13" />
-        <circle class="rim" cx="118" cy="122" r="13" />
-        <path class="rim" d="M95 122 h10" />
+        <circle class="rim" cx="78" cy="128" r="14.5" />
+        <circle class="rim" cx="122" cy="128" r="14.5" />
+        <path class="rim" d="M93 128 h14" />
       </g>
       <!--
         サングラスは**中を透かさない**（style.css）。透かしていたときは、
@@ -236,11 +239,11 @@ window.AIPET_SVG = `
         「物」に見えるかが決まる）。
       -->
       <g class="worn" id="ac-shades">
-        <path class="lens" d="M68 114 h26 v12 q -13 7 -26 0 Z" />
-        <path class="lens" d="M106 114 h26 v12 q -13 7 -26 0 Z" />
-        <path class="shine" d="M75 115 h5 l-6 11 h-5 Z" />
-        <path class="shine" d="M113 115 h5 l-6 11 h-5 Z" />
-        <path class="rim" d="M94 118 h12 M68 114 h64" />
+        <path class="lens" d="M65 121 h29 v13 q -15 7 -29 0 Z" />
+        <path class="lens" d="M106 121 h29 v13 q -15 7 -29 0 Z" />
+        <path class="shine" d="M73 122 h5 l-6 12 h-5 Z" />
+        <path class="shine" d="M114 122 h5 l-6 12 h-5 Z" />
+        <path class="rim" d="M94 125 h12 M65 121 h70" />
       </g>
 
       <!-- 頭 ── 長丁場を越えてきた数。冠より下に描くので同時に出てよい -->

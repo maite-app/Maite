@@ -41,8 +41,18 @@ body {
 #body {
   fill: var(--body);
   stroke: var(--body-dark);
-  stroke-width: 3;
+  stroke-width: 3.5;
   filter: drop-shadow(0 4px 10px hsl(var(--hue) 40% 20% / 0.35));
+}
+
+/*
+ * 体の上のつや。**白を薄く 1 枚**だけ。系統色に寄せると、色が変わるたびに
+ * つやの見え方が変わって落ち着かない ── 光は色を持たない。
+ */
+#sheen {
+  fill: #fff;
+  opacity: 0.16;
+  pointer-events: none;
 }
 
 #shadow {
@@ -1416,18 +1426,18 @@ body {
 
 /* 刻む人は瞳が小さい（一点を見ている）／委ねる人は大きい（放っている） */
 #stage.p-cut .pupil {
-  r: 2.7;
+  r: 3;
 }
 #stage.p-trust .pupil {
-  r: 5.6;
+  r: 6.3;
 }
 
 /* 外に出て行く人は口が大きい／籠る人は結んでいる */
 #stage.p-out #mouth {
-  d: path('M88 140 Q 100 156 112 140');
+  d: path('M89 143 Q 100 159 111 143');
 }
 #stage.p-in #mouth {
-  d: path('M93 144 Q 100 146 107 144');
+  d: path('M95 147 Q 100 149 105 147');
 }
 
 /* 組み立てる人は目が寄っている（近くを見る）／動かす人は離れて広く見る */
@@ -1442,10 +1452,10 @@ body {
 
 /* 走り切る人はまぶたが少し下りている（腰を据えている）／散らす人は見開いている */
 #stage.p-through .eyeball {
-  r: 7.4;
+  r: 8.6;
 }
 #stage.p-spread .eyeball {
-  r: 10.4;
+  r: 12.1;
 }
 
 /* きょろきょろ。体は普通に揺れているので、動かすのは目だけ */
@@ -1470,11 +1480,11 @@ body {
 @keyframes g-mouth {
   0%,
   100% {
-    d: path('M92 142 Q 100 149 108 142');
+    d: path('M94 145 Q 100 149 106 145');
     fill: transparent;
   }
   45% {
-    d: path('M89 137 Q 100 163 111 137');
+    d: path('M90 140 Q 100 166 110 140');
     fill: var(--ink);
   }
 }
@@ -1543,11 +1553,11 @@ body {
 @keyframes g-sneeze-mouth {
   0%,
   100% {
-    d: path('M92 142 Q 100 149 108 142');
+    d: path('M94 145 Q 100 149 106 145');
     fill: transparent;
   }
   50% {
-    d: path('M93 139 Q 100 156 107 139');
+    d: path('M94 142 Q 100 159 106 142');
     fill: var(--ink);
   }
 }
