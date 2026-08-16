@@ -151,6 +151,15 @@ body {
  * ── スマホだと 200px の枠が丸ごと輪で埋まっていた。装備のほうが
  * 「なぜ出ているか」を説明できるので、素のオーラを引っ込める。
  */
+/*
+ * 🔴 **素のオーラも出さない。** 上と同じ理由で、点線の輪は額縁に見える。
+ * 2026-08-16、実機（Lv16）で「枠線の輪」と呼ばれた。
+ * Lv15 以上でいつも出るものだったので、いちばん長く目に入っていた。
+ *
+ * ⚠️ 絵（[pet-svg.js]）の #aura は残してある。**戻したくなったらここを外すだけ**で、
+ *    絵を描き直す必要は無い。
+ */
+#stage.has-aura #aura,
 #stage.gw-def-ward #aura {
   opacity: 0;
 }
@@ -622,20 +631,23 @@ body {
   stroke-width: 2.5;
   stroke-linecap: round;
 }
-#gear #gw-ward .ring,
-#gear #gw-ward .ring2 {
-  fill: none;
-  stroke: hsl(var(--gear-def) / 0.5);
-  stroke-width: 2;
-  stroke-dasharray: 6 8;
-  animation: ward-turn 22s linear infinite;
-  transform-box: fill-box;
-  transform-origin: center;
+/*
+ * 🔴 **輪郭で囲まない。** 点線の輪は「守られている」ではなく**枠線**に見える。
+ *
+ * 実機（2026-08-16・Lv16）で、相棒より輪のほうが目に入っていた。素のオーラを
+ * 引っ込めても（[#stage.gw-def-ward #aura]）、ward 自身の輪が2本残るので同じことが起きる。
+ * スマホの 200px の枠では、体を囲む線はどうやっても額縁になる。
+ *
+ * 囲うのをやめて、**体の後ろに柔らかい膜を敷く**形にした。守りは「囲い」ではなく
+ * 「厚み」で見せる。回転も外した ── 動くものが増えるほど、相棒の表情から目が逸れる。
+ */
+#gear #gw-ward .ring {
+  fill: hsl(var(--gear-def) / 0.16);
+  stroke: none;
 }
+/* 2本目は輪だったもの。膜を1枚にするので出さない */
 #gear #gw-ward .ring2 {
-  stroke-dasharray: 3 12;
-  animation-duration: 34s;
-  animation-direction: reverse;
+  display: none;
 }
 
 @keyframes ward-turn {

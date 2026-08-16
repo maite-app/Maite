@@ -40,10 +40,12 @@ jobs:
       # ロックファイルを置いていないので `npm ci` は使えない
       - run: npm install
 
-      # 焼き直し忘れがあると、配ったものだけ古い CSS で動く
-      - run: npm run build:worker
-      - name: 焼き直しの差分が出ないこと
-        run: git diff --exit-code -- server/src/assets.js
+      # ⚠️ **ここで焼き直しの差分を見ないこと。**
+      #    Windows の checkout は LF を CRLF に変換して取り出すのに、
+      #    build:worker は LF で書く。**必ず差分が出て、必ず落ちる**
+      #    （2026-08-16、v0.1.0 の初回ビルドがこれで落ちた）。
+      #    焼き直し忘れの検査は test.yml の build ジョブ（ubuntu）で
+      #    既に走っている。**同じ検査を改行の違う場所で重ねない。**
 
       - run: npm test
 
