@@ -61,9 +61,21 @@ jobs:
         with:
           draft: true        # 中身を見てから公開する。押した瞬間に世界に出さない
           files: dist/*.exe
+          # 毎回この文が付く。**「入れ直しても消えない」を毎回書く**のは、
+          # 自動更新を入れていないからで、入れ直すのは利用者の手になる ──
+          # そのとき「育てたものが消えるのでは」で手が止まるのが一番もったいない。
           body: |
             Windows installer for Maite.
 
             **Not code-signed yet.** Windows SmartScreen will warn on first run —
             choose "More info" then "Run anyway". The source of this build is this
             repository at the tag above.
+
+            **Upgrading?** Just run the new installer over the old one — there is
+            nothing to uninstall first. Your creature does not live inside the app:
+            it lives in `~/.aipet`, so its level, class, titles and full history all
+            survive the upgrade untouched.
+
+            **There is no auto-update, on purpose.** Maite makes no network calls
+            unless you set up sync yourself, and that includes never checking for
+            its own new versions. Watch the repository if you want to hear about them.
