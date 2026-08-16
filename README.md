@@ -25,13 +25,21 @@ Work on your laptop, work in Claude Code on the web — stand up the server and 
 >
 > **Nothing leaves your machine by default.** Those derived facts go to storage you own, and only once you configure sync yourself.
 
-Here is everything the hook writes to `~/.aipet/events.jsonl`:
+Here is everything the hook writes to `~/.aipet/events.jsonl` — a tool call looks like this:
 
 ```json
-{"t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
+{"i":"9f3c1a7e2b04","t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
+```
+
+On a prompt there is one more field — `"size":"m"` — and that is the whole of it:
+
+```json
+{"i":"4d81e05c9a72","t":1786659596412,"e":"UserPromptSubmit","s":"63528a31","p":"fa748169","size":"m"}
 ```
 
 - `s` / `p` — the first 8 characters of the SHA-1 of the session id and the working directory. All we need is "same or different", so there is no reason to keep the plaintext. Your repository names and your employer's paths never appear.
+- `i` — a random id for the row, so the same event arriving twice can be recognised as one. It says nothing about you.
+- `size` — how long the prompt was, rounded to one of three buckets: `s` under 80 characters, `m` under 600, `l` beyond. It is the one number derived from a prompt, and it exists so the creature can tell "a quick nudge" from "a long brief". **Not one character of the prompt itself is read or kept.**
 - **Never stored** — prompt text, tool arguments, file paths, commands, command output, commit messages, hostnames.
 
 Configure nothing and it **never touches the network**. Configure sync and that one line above goes to your own Cloudflare account — the content and the paths were never in it to begin with, so nothing new is exposed. What goes where is written out in [server/README.md](server/README.md).
@@ -93,8 +101,8 @@ skills, auto-battles, idle expeditions, the dungeon, titles and skins.
 
 - **Phase 2** — ghost battles against other people's creatures at a similar level.
   No new infrastructure needed; it is a matter of swapping the sparring partner for
-  a real one. Worth doing not for the fight itself but for the fact that somebody
-  else's creature turns up on your screen.
+  a real one. **Not decided yet.** If it happens it will be for the fact that
+  somebody else's creature turns up on your screen, not for the fight itself.
 - **Phase 3** — elemental matchups, gear and weekly events. The first two landed
   early (the dungeon brought them forward), so what is left here is events.
 - **Landed since** — a packaged Windows installer, so you do not need Node

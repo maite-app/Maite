@@ -57,10 +57,18 @@ Claude Code に**同期でブロックして**呼ばれる。おまけが本体�
 `events.jsonl` に書くのはこの 1 行だけ：
 
 ```json
-{"t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
+{"i":"9f3c1a7e2b04","t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
 ```
 
+プロンプトのときだけ `"size":"m"` が増える（`s` 80 字未満 / `m` 600 字未満 / `l` それ以上）。
+
 `s` / `p` はセッション ID と cwd の **SHA-1 先頭 8 文字**（同一性判定にしか使わないので平文は不要）。
+`i` は行の重複を見分けるための乱数。`size` は**プロンプトから出る唯一の数**で、
+長さを 3 段階に丸めたもの ── 本文は 1 文字も読まない。
+
+⚠️ **公開している README にはここと同じ行を載せる。** 一度「これで全部」と書いた例から
+`i` と `size` が抜けていて、コードは公開されているので**読まれれば分かる嘘**になっていた
+（2026-08-16 の監査）。フィールドを足したら、README とここを同時に直す。
 
 **保存しないもの** … プロンプト本文、ツールの引数、ファイルパス、コマンド、実行結果、コミットメッセージ、ホスト名。**フィールドを増やすときは DESIGN.md §2b を読んでから。** 外部送信は既定オフで、`endpoint` と `token` が両方揃って初めて動く（`src/core/config.js`）。
 
@@ -154,7 +162,16 @@ node scripts/skin.mjs                 # 着替える（見た目だけ・数字�
 node scripts/import.mjs               # 過去ログを遡って取り込む（--write で実行）
 ```
 
-`AIPET_HOME` を指定すれば本番データに触らずに試せる：`AIPET_HOME=/tmp/aipet-test npm start`
+`AIPET_HOME` を指定すれば、**ローカルの記録**は本番と別になる：`AIPET_HOME=/tmp/aipet-test npm start`
+
+🔴 **ただし `AIPET_HOME` だけでは本番から隔離できない。** 切り替わるのは `events.jsonl` の
+置き場だけで、**送り先（`AIPET_ENDPOINT` / `AIPET_TOKEN`）は環境変数のまま残る**
+── 監査で `AIPET_HOME` を /tmp に向けて `status.mjs` を走らせたら、本番の Worker を
+読みに行って**生のトークンを標準出力に印字した**（2026-08-16）。切るならこう：
+
+```sh
+AIPET_HOME=/tmp/aipet-test AIPET_ENDPOINT= AIPET_TOKEN= npm start
+```
 
 **動作確認は `npm test` + `simulate.mjs` + `battle.mjs` + `status.mjs`。** Electron の GUI は環境によっては起動できないので、ロジックの検証はテストと捏造ログで完結させる。
 

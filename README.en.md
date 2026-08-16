@@ -25,13 +25,21 @@ Work on your laptop, work in Claude Code on the web — stand up the server and 
 >
 > **Nothing leaves your machine by default.** Those derived facts go to storage you own, and only once you configure sync yourself.
 
-Here is everything the hook writes to `~/.aipet/events.jsonl`:
+Here is everything the hook writes to `~/.aipet/events.jsonl` — a tool call looks like this:
 
 ```json
-{"t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
+{"i":"9f3c1a7e2b04","t":1786659596374,"e":"PostToolUse","s":"63528a31","p":"fa748169","tool":"Bash","ok":true}
+```
+
+On a prompt there is one more field — `"size":"m"` — and that is the whole of it:
+
+```json
+{"i":"4d81e05c9a72","t":1786659596412,"e":"UserPromptSubmit","s":"63528a31","p":"fa748169","size":"m"}
 ```
 
 - `s` / `p` — the first 8 characters of the SHA-1 of the session id and the working directory. All we need is "same or different", so there is no reason to keep the plaintext. Your repository names and your employer's paths never appear.
+- `i` — a random id for the row, so the same event arriving twice can be recognised as one. It says nothing about you.
+- `size` — how long the prompt was, rounded to one of three buckets: `s` under 80 characters, `m` under 600, `l` beyond. It is the one number derived from a prompt, and it exists so the creature can tell "a quick nudge" from "a long brief". **Not one character of the prompt itself is read or kept.**
 - **Never stored** — prompt text, tool arguments, file paths, commands, command output, commit messages, hostnames.
 
 Configure nothing and it **never touches the network**. Configure sync and that one line above goes to your own Cloudflare account — the content and the paths were never in it to begin with, so nothing new is exposed. What goes where is written out in [server/README.md](server/README.md).
@@ -146,7 +154,7 @@ When one lands, the creature puts up a speech bubble for a few seconds. It never
 
 ## Idle motion
 
-It moves on its own while it's on screen — stretching, yawning, tilting its head, spinning, nodding, humming, sighing, tripping over nothing, scratching its head, rolling over. **28 of them for when your hands are still**, and which ones are available depends on its mood.
+It moves on its own while it's on screen — stretching, yawning, tilting its head, spinning, nodding, humming, sighing, tripping over nothing, scratching its head, rolling over. **27 of them for when your hands are still**, and which ones are available depends on its mood.
 
 **What it does depends on what you're doing.** `Read` in a row and it reads a book; `Bash` and it swings a hammer; `Edit` and it picks up a brush. When you stop, it eats, watches a film, and a cat, a bird or a tortoise wanders in — there's no feeding and no petting button. They come on their own and they leave on their own.
 
@@ -333,7 +341,7 @@ server/                  Cloudflare Worker. Where laptop and cloud logs meet
 
 ## What's next
 
-- **Phase 2** — ghost battles against other people's creatures at a similar level. Everything is in place; it's a matter of swapping the sparring partner for a real one
+- **Phase 2** — ghost battles against other people's creatures at a similar level. Everything is in place; it's a matter of swapping the sparring partner for a real one. **Not decided yet** — whether it is worth doing is still open
 
 The design and the reasoning behind it are in [docs/DESIGN.md](docs/DESIGN.md) (Japanese).
 

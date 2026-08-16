@@ -79,10 +79,33 @@ function spreadFor(classId, weight) {
   return out;
 }
 
-/** ボットの系統ベクトル。1 系統に振り切った状態を作る。 */
+/*
+ * ボットの系統ベクトル。
+ *
+ * 🔴 **ここに穴がある。決めるのは人（2026-08-16 の監査）。**
+ *
+ * 1 系統に 100% 振った形は、**現実には誰も持っていない** ── 実際に働いて育った子は
+ * 必ず混ざる（学者 33% / 職人 22% / 建築家 22% …）。そして混ざった形は振り切った形に
+ * 勝つ。実測で職人に 73%、建築家に 76%。同レベル・同じ技・同じ装備でも、
+ * **形が違うだけで平均 10pt 勝っていた**。CLAUDE.md ① の「系統ごとの公平さ」は
+ * 純 vs 純でしか測っていないので、この穴を通り抜けていた。
+ *
+ * `DOMINANCE` を 1 未満にすると相手も混ざり、その 10pt は消える。ただし**万能の値が無い**:
+ *
+ *   1.0（いま）… 育てた個体が Lv60 で 69%（線 45〜65% の外）
+ *   0.8       … Lv60 66%。まだ外
+ *   0.7       … Lv60 65%（境目ちょうど）。test/battle.test.mjs の Lv20 学者が 17 連敗
+ *   0.6       … balance は全線内側。同じ Lv20 学者は勝率 44%→36% に落ちる
+ *
+ * 個体ごとの散らばり（約 25pt）が線の幅（20pt）より大きいので、**1 つの値で全部は入らない**。
+ * どちらを取るかは設計の判断なので、ここは動かさずに残してある。
+ */
+const DOMINANCE = 1;
+
 function vectorFor(classId) {
+  const rest = (1 - DOMINANCE) / CLASS_IDS.length;
   const v = {};
-  for (const id of CLASS_IDS) v[id] = id === classId ? 1 : 0;
+  for (const id of CLASS_IDS) v[id] = rest + (id === classId ? DOMINANCE : 0);
   return v;
 }
 
@@ -101,8 +124,8 @@ function vectorFor(classId) {
  */
 // 下限を 3 / 4 にしていた頃、Lv5 では実質 -60%〜+80% の幅になっていて、
 // +4 を引いた日はステータス差 47% で最初から詰んでいた（勝率 43%・9 連敗）。
-const down = (level) => Math.max(1, Math.round(level * 0.15));
-const up = (level) => Math.max(2, Math.round(level * 0.22));
+const down = (level) => Math.max(2, Math.round(level * 0.15));
+const up = (level) => Math.max(1, Math.round(level * 0.22));
 
 /** 相手を配る単位。7 戦ぶん（2 時間ごとなので、だいたい半日〜1 日）。 */
 const CYCLE = 7;
