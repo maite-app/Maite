@@ -404,6 +404,41 @@ function render(view) {
 
   // タブに出るのは**この子の名前**（＝いまの職）。Maite はプロダクトの名前なので出さない
   document.title = `${view.name} Lv${view.level}`;
+
+  maybeShowBattle();
+}
+
+/**
+ * **開いたら、その一戦を 1 回だけ見せる。**
+ *
+ * 戦闘は「読むログ」ではなく「たまに見かけるしぐさ」に降ろしてある（DESIGN.md §5c）。
+ * オーバーレイは一日中そこに出ているので、その確率で足りる ── ところが
+ * **スマホは見ようとして開くもの**で、開いている 20 秒ほどのあいだに
+ * しぐさの抽選が当たるとは限らない。同じ設計をそのまま持ってきた結果、
+ * **スマホでは戦っているところをほとんど見られなかった**（2026-08-16 の指摘）。
+ *
+ * だから開いた 1 回につき 1 回だけ、自分から流す。
+ *
+ * - **ボタンは足さない。** 押すものを増やすと「見に行く作業」になる
+ * - **繰り返さない。** 1 回で終わり。もう一度見たければ開き直すだけ
+ * - **隠れているあいだは流さない**（誰も見ていない画面で終わってしまう）
+ */
+let battleShown = false;
+
+function maybeShowBattle() {
+  if (battleShown || gesture || !current || !current.battle) return;
+  if (document.hidden) return;
+  battleShown = true;
+  // 開いた直後は画面が組み上がっている最中なので、少し置いてから
+  setTimeout(() => {
+    if (!current || !current.battle) return;
+    if (document.hidden) {
+      // 見ていないあいだに終わらせない。次に描いたときに出す
+      battleShown = false;
+      return;
+    }
+    playGesture(current.battle.winner === 'foe' ? 'battle-lose' : 'battle-win', 3400);
+  }, 900);
 }
 
 /**
