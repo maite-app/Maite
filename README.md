@@ -34,6 +34,14 @@ Configure nothing and it **never touches the network**. Configure sync and that 
 
 ## Install
 
+**Windows** — grab the installer from
+[Releases](https://github.com/maite-app/Maite/releases), run it, done.
+It is not code-signed yet, so SmartScreen will warn on first run: choose
+**More info → Run anyway**. Every build is made by GitHub Actions from the
+tag it says it came from, in the open.
+
+**From source** (any platform, needs Node):
+
 ```sh
 npm install
 npm run install-hooks   # adds the hook to ~/.claude/settings.json

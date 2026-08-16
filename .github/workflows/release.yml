@@ -1,0 +1,67 @@
+# タグを打つと、Windows のインストーラを作って Release にぶら下げる。
+#
+# 🎯 なぜ「配れる形」が要るか
+#    いまは Node を入れて `npm install` してからでないと動かせない。
+#    試す人がそこで大半消える。**押したら入る形**にして初めて、置いた意味が出る。
+#
+# 🔴 **公開リポジトリでしか走らせない。**
+#    Actions の分数は **private リポジトリだけが無料枠を消費する**。
+#    公開側（maite-app/Maite）で走らせれば何度作っても 0 分だが、
+#    開発側（private）で同じタグを打つと、そちらは分数を食う。
+#    下の `if` がその歯止めで、**外さないこと**。
+#
+# 署名はしていない。初回起動で SmartScreen の警告が出るのは想定どおりで、
+# 証明書（年 $200〜）を買うまでは READMEでそう伝える方が誠実である。
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # Release を作ってファイルを上げる
+
+jobs:
+  windows:
+    # 🔴 公開リポジトリのときだけ。private では走らせない（上の注を読むこと）
+    if: github.repository == 'maite-app/Maite'
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ロックファイルを置いていないので `npm ci` は使えない
+      - run: npm install
+
+      # 焼き直し忘れがあると、配ったものだけ古い CSS で動く
+      - run: npm run build:worker
+      - name: 焼き直しの差分が出ないこと
+        run: git diff --exit-code -- server/src/assets.js
+
+      - run: npm test
+
+      - name: インストーラを作る
+        run: npm run dist
+
+      - name: 何ができたか
+        shell: bash
+        run: ls -la dist/*.exe
+
+      - name: Release にぶら下げる
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true        # 中身を見てから公開する。押した瞬間に世界に出さない
+          files: dist/*.exe
+          body: |
+            Windows installer for Maite.
+
+            **Not code-signed yet.** Windows SmartScreen will warn on first run —
+            choose "More info" then "Run anyway". The source of this build is this
+            repository at the tag above.

@@ -18,9 +18,46 @@
     "build:worker": "node scripts/build-worker-assets.mjs",
     "push": "node hooks/aipet-hook.mjs --push",
     "uninstall-hooks": "node scripts/install-hooks.mjs --remove",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node --test \"test/*.test.mjs\"",
+    "dist": "electron-builder --win --publish never"
   },
   "devDependencies": {
-    "electron": "^34.0.0"
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "app.maite.desktop",
+    "productName": "Maite",
+    "copyright": "Copyright (c) 2026 maite-app",
+    "files": [
+      "src/**/*",
+      "hooks/**/*",
+      "scripts/install-hooks.mjs",
+      "package.json",
+      "!**/*.map",
+      "!**/node_modules/**/{test,__tests__,docs,example,examples}/**"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Maite"
+    }
   }
 }
