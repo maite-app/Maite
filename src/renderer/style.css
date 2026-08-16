@@ -414,7 +414,6 @@ body {
 #stage.ac-beard #ac-beard,
 #stage.ac-glasses #ac-glasses,
 #stage.ac-shades #ac-shades,
-#stage.ac-headphones #ac-headphones,
 #stage.ac-scarf #ac-scarf,
 #stage.ac-bandage #ac-bandage,
 #stage.ac-earring #ac-earring {
@@ -459,16 +458,6 @@ body {
 #wear #ac-shades .shine {
   fill: #fff;
   opacity: 0.14;
-}
-
-#wear #ac-headphones .band {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-#wear #ac-headphones .cup {
-  fill: var(--ink);
 }
 
 #wear #ac-scarf .cloth {

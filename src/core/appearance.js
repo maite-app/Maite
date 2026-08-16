@@ -180,9 +180,6 @@ export const ACCESSORIES = [
   { id: 'glasses', spot: 'eyes', step: 1, from: (f) => f.classId === 'scholar' },
   { id: 'shades', spot: 'eyes', step: 2, from: (f) => f.nightTier >= 1 },
 
-  // 頭 ── 長丁場を越えてきた数。冠より下に描くので同時に出てよい
-  { id: 'headphones', spot: 'head', step: 1, from: (f) => f.traits.compacts >= 20 },
-
   // 首 ── 席に着いた回数
   { id: 'scarf', spot: 'neck', step: 1, from: (f) => f.traits.sessions >= 150 },
 

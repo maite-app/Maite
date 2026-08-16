@@ -246,18 +246,6 @@ window.AIPET_SVG = `
         <path class="rim" d="M94 125 h12 M65 121 h70" />
       </g>
 
-      <!-- 頭 ── 長丁場を越えてきた数。冠より下に描くので同時に出てよい -->
-      <!--
-        つるは**頭の上を通す。** 目の高さに掛けていたので、耳当てが顔の横に
-        浮いて見えていた ── この子に耳は無いので、位置で「頭に載っている」を
-        出すしかない。
-      -->
-      <g class="worn" id="ac-headphones">
-        <path class="band" d="M56 118 q 44 -52 88 0" />
-        <rect class="cup" x="44" y="112" width="15" height="26" rx="7" />
-        <rect class="cup" x="141" y="112" width="15" height="26" rx="7" />
-      </g>
-
       <!-- 首 ── 席に着いた回数 -->
       <!-- 口に掛けない。口元は型（persona.js）が決めるものなので、隠すと誰か分からなくなる -->
       <g class="worn" id="ac-scarf">
