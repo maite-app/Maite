@@ -73,7 +73,7 @@ When one lands, the creature puts up a speech bubble for a few seconds. It never
 
 ## Idle motion
 
-It moves on its own while it's on screen — stretching, yawning, tilting its head, spinning, nodding, humming, sighing, tripping over nothing, scratching its head, rolling over. **28 of them for when your hands are still**, and which ones are available depends on its mood.
+It moves on its own while it's on screen — stretching, yawning, tilting its head, spinning, nodding, humming, sighing, tripping over nothing, scratching its head, rolling over. **27 of them for when your hands are still**, and which ones are available depends on its mood.
 
 **What it does depends on what you're doing.** `Read` in a row and it reads a book; `Bash` and it swings a hammer; `Edit` and it picks up a brush. When you stop, it eats, watches a film, and a cat, a bird or a tortoise wanders in — there's no feeding and no petting button. They come on their own and they leave on their own.
 
@@ -260,6 +260,6 @@ server/                  Cloudflare Worker. Where laptop and cloud logs meet
 
 ## What's next
 
-- **Phase 2** — ghost battles against other people's creatures at a similar level. Everything is in place; it's a matter of swapping the sparring partner for a real one
+- **Phase 2** — ghost battles against other people's creatures at a similar level. Everything is in place; it's a matter of swapping the sparring partner for a real one. **Not decided yet** — whether it is worth doing is still open
 
 The design and the reasoning behind it are in [docs/DESIGN.md](docs/DESIGN.md) (Japanese).

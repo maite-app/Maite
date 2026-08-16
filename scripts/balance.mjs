@@ -29,7 +29,9 @@ import { botFor } from '../src/core/bots.js';
 import { rngFrom, hashSeed } from '../src/core/rng.js';
 import { SKILL_IDS, SKILLS, skillsFor } from '../src/core/skills.js';
 import { emptyState, applyEvents, levelForExp } from '../src/core/growth.js';
-import { ACHIEVEMENT_IDS } from '../src/core/achievements.js';
+// 分母は VISIBLE_IDS。ACHIEVEMENT_IDS には job:* の 16 件が入っていて、
+// それを分母にすると「まだなっていない職も数える」＝掟に反する数え方になる
+import { VISIBLE_IDS } from '../src/core/achievements.js';
 import { dungeonFor, floorFor, effortFor, RARITIES, findAt, IMBUES, weightOf, BOSS_EVERY } from '../src/core/dungeon.js';
 
 const only = (id) => Object.fromEntries(CLASS_IDS.map((c) => [c, c === id ? 1 : 0]));
@@ -283,7 +285,7 @@ function pace() {
       const skills = skillsFor(state).map((s) => `${s.ja}★${s.tier}`).join(' ') || '技なし';
       const badges = Object.keys(state.achievements).length;
       console.log(
-        `  Lv${String(marks[next]).padStart(3)}  ${String(day + 1).padStart(4)} 日目  実績 ${String(badges).padStart(2)}/${ACHIEVEMENT_IDS.length}  ${skills}`,
+        `  Lv${String(marks[next]).padStart(3)}  ${String(day + 1).padStart(4)} 日目  実績 ${String(badges).padStart(2)}/${VISIBLE_IDS.length}  ${skills}`,
       );
       next += 1;
     }

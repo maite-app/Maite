@@ -514,6 +514,7 @@ export default {
 const PAGE = `<!doctype html>
 <html lang="ja"><head>
 <meta charset="utf-8">
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#12141a">
 <title>見習い</title>
