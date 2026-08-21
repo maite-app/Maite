@@ -18,10 +18,16 @@
 # セッションによっては aipet の中身を持っていない（intake だけ、など）。
 # 公開している側から取れば、**どのセッションでも同じ手順で入る。**
 #
-# ## 🔴 送り先が無ければ、何もしない
+# ## 🔴 送り先が無くても、**記録は始める**
 #
-# `AIPET_ENDPOINT` と `AIPET_TOKEN` が無ければ**黙って終わる**（exit 0）。
-# 設定していない人の環境を、勝手に触らないため。
+# 前は `AIPET_ENDPOINT` / `AIPET_TOKEN` が無いと何もせず終わっていた。
+# その結果 **8/16 以降のクラウドの作業が丸ごと 0 件**で、レベルが止まった
+# （2026-08-21 に判明）── 合言葉が無いのは「送れない」だけであって、
+# 「数えなくていい」ではない。
+#
+# フックが書くのはこの箱の中の 1 ファイルだけで、外へは何も出ない。
+# だから**入れるのは常に入れる**。送信は合言葉が揃っているときだけ動く
+# （`src/core/config.js`）。溜まったぶんは、あとから `send-log.mjs` で渡せる。
 #
 # ⚠️ **`set -e` を外さないこと。** 途中で失敗したまま進むと、
 #    「入ったつもりで入っていない」がいちばん気づけない壊れ方になる。
@@ -29,8 +35,10 @@
 set -e
 
 if [ -z "$AIPET_ENDPOINT" ] || [ -z "$AIPET_TOKEN" ]; then
-  echo "[maite] AIPET_ENDPOINT / AIPET_TOKEN が無いので、何もしません"
-  exit 0
+  echo "[maite] 合言葉が無いので、記録だけします（送信はしません）"
+  SEND=no
+else
+  SEND=yes
 fi
 
 BASE="${MAITE_RAW_BASE:-https://raw.githubusercontent.com/maite-app/Maite/main}"
@@ -43,8 +51,16 @@ mkdir -p "$KIT/hooks" "$KIT/scripts"
 
 # install-hooks.mjs は自分の場所からの相対で ../hooks/aipet-hook.mjs を見る。
 # 同じ形に置けば、リポジトリの中と同じものがそのまま動く（作り直さない）
-curl -fsSL "$BASE/hooks/aipet-hook.mjs"      -o "$KIT/hooks/aipet-hook.real.mjs"
-curl -fsSL "$BASE/scripts/install-hooks.mjs" -o "$KIT/scripts/install-hooks.mjs"
+# リポジトリを持っている箱なら、取りに行かずに手元のものを使う。
+# 網が塞がっている箱でも入る（curl が 1 回でも失敗すると set -e で全部止まる）
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+if [ -f "$HERE/hooks/aipet-hook.mjs" ] && [ -f "$HERE/scripts/install-hooks.mjs" ]; then
+  cp "$HERE/hooks/aipet-hook.mjs"      "$KIT/hooks/aipet-hook.real.mjs"
+  cp "$HERE/scripts/install-hooks.mjs" "$KIT/scripts/install-hooks.mjs"
+else
+  curl -fsSL "$BASE/hooks/aipet-hook.mjs"      -o "$KIT/hooks/aipet-hook.real.mjs"
+  curl -fsSL "$BASE/scripts/install-hooks.mjs" -o "$KIT/scripts/install-hooks.mjs"
+fi
 
 # 🔴 **Node の fetch は HTTPS_PROXY を見ない。**
 #
@@ -80,4 +96,9 @@ WRAPPER
 
 node "$KIT/scripts/install-hooks.mjs"
 
-echo "[maite] クラウドのこの箱でも経験値が入ります（送り先: ${AIPET_ENDPOINT%%:*}://…）"
+if [ "$SEND" = yes ]; then
+  echo "[maite] クラウドのこの箱でも経験値が入ります（送り先: ${AIPET_ENDPOINT%%:*}://…）"
+else
+  echo "[maite] 記録します。送り先が無いので、この箱の中に溜まります"
+  echo "[maite]   ~/.aipet/events.jsonl ── 渡すときは PC で node scripts/send-log.mjs <file>"
+fi
