@@ -176,3 +176,27 @@ test('Atomics.wait が使えない環境でも掛け直しが走る', () => {
 test.after(() => {
   fs.rmSync(HOME, { recursive: true, force: true });
 });
+
+test('空で置いた環境変数は「送信オフ」として効く', async () => {
+  /*
+   * 🔴 `||` だと空文字が偽になって config.json の値に落ちる。
+   *    CLAUDE.md が配っている隔離の呪文
+   *    （AIPET_ENDPOINT= AIPET_TOKEN= npm start）がそれで効いておらず、
+   *    隔離したつもりで本番の Worker を読みに行っていた。
+   */
+  const { loadConfig } = await import('../src/core/config.js');
+  const keep = { e: process.env.AIPET_ENDPOINT, t: process.env.AIPET_TOKEN };
+  try {
+    process.env.AIPET_ENDPOINT = '';
+    process.env.AIPET_TOKEN = '';
+    const cfg = loadConfig();
+    assert.equal(cfg.endpoint, null, '空で置いた endpoint が config.json に落ちている');
+    assert.equal(cfg.token, null, '空で置いた token が config.json に落ちている');
+    assert.equal(cfg.enabled, false, '空で置いたのに送信が有効になっている');
+  } finally {
+    if (keep.e === undefined) delete process.env.AIPET_ENDPOINT;
+    else process.env.AIPET_ENDPOINT = keep.e;
+    if (keep.t === undefined) delete process.env.AIPET_TOKEN;
+    else process.env.AIPET_TOKEN = keep.t;
+  }
+});

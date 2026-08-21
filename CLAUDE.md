@@ -181,13 +181,23 @@ node scripts/import.mjs               # 過去ログを遡って取り込む（-
 `AIPET_HOME` を指定すれば、**ローカルの記録**は本番と別になる：`AIPET_HOME=/tmp/aipet-test npm start`
 
 🔴 **ただし `AIPET_HOME` だけでは本番から隔離できない。** 切り替わるのは `events.jsonl` の
-置き場だけで、**送り先（`AIPET_ENDPOINT` / `AIPET_TOKEN`）は環境変数のまま残る**
+置き場だけで、**送り先（`AIPET_ENDPOINT` / `AIPET_TOKEN`）は残る**
 ── 監査で `AIPET_HOME` を /tmp に向けて `status.mjs` を走らせたら、本番の Worker を
 読みに行って**生のトークンを標準出力に印字した**（2026-08-16）。切るならこう：
 
 ```sh
 AIPET_HOME=/tmp/aipet-test AIPET_ENDPOINT= AIPET_TOKEN= npm start
 ```
+
+🔴 **`status.mjs` の出力を人に渡さない。** 「スマホ」の行に**生のトークンが入る**
+（それがブックマークする URL そのものなので、消すと使えなくなる）。
+橋に流す・貼り付ける・スクリーンショットを撮る、のどれもトークンを配ることになる。
+渡す必要があるなら `node scripts\status.mjs | Select-String -NotMatch '/p/'` のように
+落としてから渡す。
+
+⚠️ 2026-08-21 まで、上の呪文は**効いていなかった** ── `config.js` が
+`process.env.AIPET_TOKEN || file.token` で見ていて、空文字は偽なので
+`config.json` の値に落ちていた。いまは「置いてあるか」で見る（空で置けば送信オフ）。
 
 **動作確認は `npm test` + `simulate.mjs` + `battle.mjs` + `status.mjs`。** Electron の GUI は環境によっては起動できないので、ロジックの検証はテストと捏造ログで完結させる。
 
