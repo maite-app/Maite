@@ -1,7 +1,7 @@
 {
   "name": "aipet",
   "productName": "Maite",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Maite ── Claude Code の作業ログから育つデスクトップ相棒",
   "license": "MIT",
