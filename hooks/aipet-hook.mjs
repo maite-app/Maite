@@ -89,7 +89,18 @@ async function record() {
   // そこへリポジトリ側の hook まで発火すると 1 つの操作が 2 回記録されて
   // EXP が倍になる。クラウドのコンテナにはユーザー設定が無く、代わりに
   // 環境変数で設定を渡すので、それが無い環境では黙って何もしない。
-  if (process.argv.includes('--cloud') && !process.env.AIPET_ENDPOINT) return;
+  //
+  // 🔴 **箱ごと入れてある場合も、リポジトリ側は黙る。**
+  //    cloud-setup.sh は ~/.claude/settings.json に入れる（作業場所が
+  //    どこでも効くように）。そこへリポジトリ側まで発火すると、
+  //    合言葉のあるクラウドの箱で 1 つの操作が 2 回記録される
+  //    ── しかも 2 回の `i` は別々の乱数なので、サーバー側の重複弾きも
+  //    すり抜ける。箱ごとの仕掛けが居るなら、そちらに任せる。
+  if (process.argv.includes('--cloud')) {
+    if (!process.env.AIPET_ENDPOINT) return;
+    const kit = path.join(os.homedir(), '.maite-hook', 'hooks', 'aipet-hook.mjs');
+    if (fs.existsSync(kit)) return;
+  }
 
   const timer = bailoutTimer();
   const raw = await readStdin();

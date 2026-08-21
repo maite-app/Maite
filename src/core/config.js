@@ -20,8 +20,21 @@ export function loadConfig() {
     file = {};
   }
 
-  const endpoint = process.env.AIPET_ENDPOINT || file.endpoint || null;
-  const token = process.env.AIPET_TOKEN || file.token || null;
+  /*
+   * 🔴 **環境変数は「空で置いた」も指示として扱う。**
+   *
+   * `||` にしていたので `AIPET_TOKEN=` は空文字＝偽 → config.json の値に
+   * 落ちていた。CLAUDE.md が隔離の呪文として配っていた
+   * `AIPET_ENDPOINT= AIPET_TOKEN= npm start` が**効いていなかった**
+   * ── 隔離したつもりで本番の Worker を読みに行く。
+   *
+   * 置いてあるかどうかで見る。空で置いてあるなら「送信オフ」。
+   */
+  const fromEnv = (name, fallback) =>
+    (name in process.env ? process.env[name] || null : fallback || null);
+
+  const endpoint = fromEnv('AIPET_ENDPOINT', file.endpoint);
+  const token = fromEnv('AIPET_TOKEN', file.token);
 
   /*
    * 付け替えた名前。**state ではなくここに置く。**

@@ -340,10 +340,11 @@ test('顔まわりの小物は、同じ場所で重ならない', () => {
   assert.deepEqual([...new Set(spots)], spots, `同じ場所に 2 つ出た: ${worn.join(' ')}`);
 
   // いちばん育った状態では、段のいちばん上が出る
-  assert.ok(worn.includes('beard'), '1 年ものに顎ひげが出ない');
   assert.ok(worn.includes('shades'), '夜目持ちにサングラスが出ない');
-  assert.ok(!worn.includes('stubble'), '顎ひげと無精ひげが同時に出ている');
   assert.ok(!worn.includes('glasses'), 'サングラスと眼鏡が同時に出ている');
+
+  // 🔴 小物は目元だけ。増やすなら、まず顔より目立たないか見る（2026-08-16 の判断）
+  assert.deepEqual([...new Set(spots)], ['eyes'], `目元以外の小物が出た: ${worn.join(' ')}`);
 });
 
 test('小物はどれも作業ログから出る（買えるものではない）', () => {
@@ -468,7 +469,7 @@ test('消える印（ケガ・使い込み・小物）は、付け替えの一�
    * ── ケガは 1 時間で治る前提なので、ここに載っていないと治らなくなる。
    */
   const classes = appearanceClasses([{ slot: 'atk', look: 'blade' }]);
-  for (const cls of ['hurt-1', 'hurt-2', 'pt-0', 'pt-3', 'ac-beard', 'ac-shades']) {
+  for (const cls of ['hurt-1', 'hurt-2', 'pt-0', 'pt-3', 'ac-glasses', 'ac-shades']) {
     assert.ok(classes.includes(cls), `${cls} が外す一覧に無い`);
   }
 

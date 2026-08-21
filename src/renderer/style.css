@@ -41,8 +41,18 @@ body {
 #body {
   fill: var(--body);
   stroke: var(--body-dark);
-  stroke-width: 3;
+  stroke-width: 2.8;
   filter: drop-shadow(0 4px 10px hsl(var(--hue) 40% 20% / 0.35));
+}
+
+/*
+ * 体の上のつや。**白を薄く 1 枚**だけ。系統色に寄せると、色が変わるたびに
+ * つやの見え方が変わって落ち着かない ── 光は色を持たない。
+ */
+#sheen {
+  fill: #fff;
+  opacity: 0.1;
+  pointer-events: none;
 }
 
 #shadow {
@@ -399,22 +409,9 @@ body {
   transition: opacity 0.6s ease;
 }
 
-#stage.ac-stubble #ac-stubble,
-#stage.ac-moustache #ac-moustache,
-#stage.ac-beard #ac-beard,
 #stage.ac-glasses #ac-glasses,
-#stage.ac-shades #ac-shades,
-#stage.ac-headphones #ac-headphones,
-#stage.ac-scarf #ac-scarf,
-#stage.ac-bandage #ac-bandage,
-#stage.ac-earring #ac-earring {
+#stage.ac-shades #ac-shades {
   opacity: 1;
-}
-
-/* ひげは体より少し濃いだけ。別の色を置くと、貼り付けたように見える */
-#wear .hair {
-  fill: var(--body-dark);
-  opacity: 0.85;
 }
 
 #wear .rim {
@@ -451,28 +448,6 @@ body {
   opacity: 0.14;
 }
 
-#wear #ac-headphones .band {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-#wear #ac-headphones .cup {
-  fill: var(--ink);
-}
-
-#wear #ac-scarf .cloth {
-  fill: hsl(var(--hue) 45% 46%);
-  stroke: hsl(var(--hue) 45% 34%);
-  stroke-width: 2;
-}
-
-#wear #ac-bandage .patch {
-  fill: #f2e9dc;
-  stroke: #cbbfae;
-  stroke-width: 1.5;
-}
-
 /* ---- ケガ ----------------------------------------------------------
    **直前の一戦に負けたときだけ、1 時間。**（appearance.js の hurtFor）
 
@@ -507,16 +482,6 @@ body {
   stroke-width: 2.5;
   stroke-linecap: round;
   opacity: 0.7;
-}
-
-#wear #ac-earring .stud {
-  fill: hsl(45 80% 62%);
-}
-#wear #ac-earring .wire {
-  fill: none;
-  stroke: hsl(45 60% 52%);
-  stroke-width: 2.5;
-  stroke-linecap: round;
 }
 
 /* ---- 装備と、育ちの段 ------------------------------------------------
@@ -1416,18 +1381,18 @@ body {
 
 /* 刻む人は瞳が小さい（一点を見ている）／委ねる人は大きい（放っている） */
 #stage.p-cut .pupil {
-  r: 2.7;
+  r: 3;
 }
 #stage.p-trust .pupil {
-  r: 5.6;
+  r: 6.3;
 }
 
 /* 外に出て行く人は口が大きい／籠る人は結んでいる */
 #stage.p-out #mouth {
-  d: path('M88 140 Q 100 156 112 140');
+  d: path('M91 142 Q 100 154 109 142');
 }
 #stage.p-in #mouth {
-  d: path('M93 144 Q 100 146 107 144');
+  d: path('M96 146 Q 100 147.5 104 146');
 }
 
 /* 組み立てる人は目が寄っている（近くを見る）／動かす人は離れて広く見る */
@@ -1442,10 +1407,10 @@ body {
 
 /* 走り切る人はまぶたが少し下りている（腰を据えている）／散らす人は見開いている */
 #stage.p-through .eyeball {
-  r: 7.4;
+  r: 8.6;
 }
 #stage.p-spread .eyeball {
-  r: 10.4;
+  r: 12.1;
 }
 
 /* きょろきょろ。体は普通に揺れているので、動かすのは目だけ */
@@ -1470,11 +1435,11 @@ body {
 @keyframes g-mouth {
   0%,
   100% {
-    d: path('M92 142 Q 100 149 108 142');
+    d: path('M95 144 Q 100 147 105 144');
     fill: transparent;
   }
   45% {
-    d: path('M89 137 Q 100 163 111 137');
+    d: path('M92 139 Q 100 159 108 139');
     fill: var(--ink);
   }
 }
@@ -1543,11 +1508,11 @@ body {
 @keyframes g-sneeze-mouth {
   0%,
   100% {
-    d: path('M92 142 Q 100 149 108 142');
+    d: path('M95 144 Q 100 147 105 144');
     fill: transparent;
   }
   50% {
-    d: path('M93 139 Q 100 156 107 139');
+    d: path('M95 141 Q 100 154 105 141');
     fill: var(--ink);
   }
 }

@@ -83,7 +83,7 @@ Write-Host "  自動起動 : $Link"
 if ($rc -eq 0) {
   Write-Host "  見張り   : $TaskName（1分ごと。落ちていたら立ち上げ直す）" -ForegroundColor Green
   Write-Host ""
-  Write-Host "  ＝ これ以降、遠隔からの「立ち上げ直し」は" -ForegroundColor Cyan
+  Write-Host "  ＝ これ以降、スマホからの「立ち上げ直し」は" -ForegroundColor Cyan
   Write-Host "     electron を止めるだけで済みます（1分以内に戻ります）" -ForegroundColor Cyan
 } else {
   Write-Host "  ※見張りの登録は失敗しました（自動起動だけ有効です）" -ForegroundColor DarkYellow

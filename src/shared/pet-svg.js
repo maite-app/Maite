@@ -7,7 +7,7 @@
  */
 window.AIPET_SVG = `
 <svg id="pet" viewBox="0 14 200 200" aria-hidden="true">
-  <ellipse id="shadow" cx="100" cy="168" rx="42" ry="8" />
+  <ellipse id="shadow" cx="100" cy="168" rx="44" ry="7.5" />
 
   <!-- オーラは体より奥。creature より前に置くと胴体を横切る -->
   <g id="aura">
@@ -97,18 +97,18 @@ window.AIPET_SVG = `
 
     <!-- Lv3 で生える触角。系統が確定した合図でもある -->
     <g id="antenna">
-      <path d="M100 92 Q 96 68 108 56" />
-      <circle cx="110" cy="53" r="7" />
+      <path d="M100 88 Q 95 62 108 52" />
+      <circle cx="110" cy="49" r="6.5" />
     </g>
 
     <!-- Lv10 で乗る冠 -->
     <g id="crown">
-      <path d="M74 74 L82 52 L100 66 L118 52 L126 74 Z" />
+      <path d="M76 78 L83 58 L100 70 L117 58 L124 78 Z" />
     </g>
 
     <path
       id="body"
-      d="M100 78 C 138 78 156 106 156 130 C 156 154 132 166 100 166 C 68 166 44 154 44 130 C 44 106 62 78 100 78 Z"
+      d="M 100 80 C 140 80 156 107 156 132 C 156 155 130 166 100 166 C 70 166 44 155 44 132 C 44 107 60 80 100 80 Z"
     />
 
     <!--
@@ -118,9 +118,12 @@ window.AIPET_SVG = `
       顔より奥・体より手前。顔に掛けると、型（persona.js）が決める目つきと
       口元が模様に埋もれる ── **顔つきはスキンで買えない**（§8c）。
     -->
+    <!-- 体の上のつや。丸みを 1 枚で出す（クラスで色を付ける ── 直書きしない） -->
+    <path id="sheen" d="M 72 90 C 85 85 115 85 128 90 C 115 82 85 82 72 90 Z" />
+
     <g id="skin-texture" clip-path="url(#body-clip)">
       <clipPath id="body-clip">
-        <path d="M100 78 C 138 78 156 106 156 130 C 156 154 132 166 100 166 C 68 166 44 154 44 130 C 44 106 62 78 100 78 Z" />
+        <path d="M 100 80 C 140 80 156 107 156 132 C 156 155 130 166 100 166 C 70 166 44 155 44 132 C 44 107 60 80 100 80 Z" />
       </clipPath>
 
       <!-- 墨：紙目のような細い縞 -->
@@ -151,24 +154,24 @@ window.AIPET_SVG = `
     </g>
 
     <g id="face">
-      <g class="eye" transform="translate(82 122)">
-        <circle class="eyeball" r="9" />
-        <circle class="pupil" r="4" />
+      <g class="eye" transform="translate(80 126)">
+        <circle class="eyeball" r="9.8" />
+        <circle class="pupil" r="4.2" />
         <!--
           光。**これ 1 個で顔つきが変わる** ── 瞳が真っ黒のままだと、
           どんなに形を丸くしても「点」に見える。左上に寄せるのは、
           そこに光源があると読ませるため（両目とも同じ側に置く）。
         -->
-        <circle class="glint" cx="-2.6" cy="-2.6" r="1.9" />
-        <path class="lid" d="M-10 0 Q 0 6 10 0" />
+        <circle class="glint" cx="-2.7" cy="-2.7" r="2" />
+        <path class="lid" d="M-10 0 Q 0 6.5 10 0" />
       </g>
-      <g class="eye" transform="translate(118 122)">
-        <circle class="eyeball" r="9" />
-        <circle class="pupil" r="4" />
-        <circle class="glint" cx="-2.6" cy="-2.6" r="1.9" />
-        <path class="lid" d="M-10 0 Q 0 6 10 0" />
+      <g class="eye" transform="translate(120 126)">
+        <circle class="eyeball" r="9.8" />
+        <circle class="pupil" r="4.2" />
+        <circle class="glint" cx="-2.7" cy="-2.7" r="2" />
+        <path class="lid" d="M-10 0 Q 0 6.5 10 0" />
       </g>
-      <path id="mouth" d="M92 142 Q 100 149 108 142" />
+      <path id="mouth" d="M95 144 Q 100 147 105 144" />
 
       <!--
         頬の赤み。**顔つきは型が決める**ので、形には触らない ── 色を薄く
@@ -176,8 +179,8 @@ window.AIPET_SVG = `
         ほとんど出ない（無彩色の子に頬紅だけ乗ると浮く）。
       -->
       <g id="blush">
-        <ellipse cx="66" cy="136" rx="9" ry="5.5" />
-        <ellipse cx="134" cy="136" rx="9" ry="5.5" />
+        <ellipse cx="70" cy="137" rx="7.5" ry="4" />
+        <ellipse cx="130" cy="137" rx="7.5" ry="4" />
       </g>
     </g>
 
@@ -199,31 +202,22 @@ window.AIPET_SVG = `
     <!--
       顔まわりの小物。**顔より手前**（目と口の上に乗る）。
 
+      🔴 **目元だけ**（2026-08-16 の判断）。ひげ・マフラー・絆創膏・耳飾りは
+      素の顔の良さを消していたので落とした。足すときは同じ目で見ること。
+
       **これは買えるスキンとは別物。** どれも作業ログから生えているので、
       目つき・口元と出どころが同じ ── だから顔に掛かってよい（買えるスキンの
       ほうは、いままでどおり顔に一切触らない。DESIGN.md §8c）。
 
-      顔は 目 (82,122) / (118,122)・口 (100,142) の周り。
+      顔は 目 (80,126) / (120,126)・口 (100,144) の周り。
       **同じ場所のものは同時に出ない**（appearance.js が段の大きいほうだけ返す）。
     -->
     <g id="wear">
-      <!-- 口元 ── 一緒に過ごした長さで伸びる -->
-      <g class="worn" id="ac-stubble">
-        <path class="hair" d="M84 150 q 16 10 32 0 q -4 12 -16 12 q -12 0 -16 -12 Z" />
-      </g>
-      <g class="worn" id="ac-moustache">
-        <path class="hair" d="M78 134 q 20 -8 22 3 q 2 -11 22 -3 q -8 11 -22 8 q -14 3 -22 -8 Z" />
-      </g>
-      <g class="worn" id="ac-beard">
-        <path class="hair" d="M78 134 q 20 -8 22 3 q 2 -11 22 -3 q -8 11 -22 8 q -14 3 -22 -8 Z" />
-        <path class="hair" d="M80 150 q 20 13 40 0 q -3 18 -20 18 q -17 0 -20 -18 Z" />
-      </g>
-
       <!-- 目元 ── 眼鏡は学者、サングラスは夜目から -->
       <g class="worn" id="ac-glasses">
-        <circle class="rim" cx="82" cy="122" r="13" />
-        <circle class="rim" cx="118" cy="122" r="13" />
-        <path class="rim" d="M95 122 h10" />
+        <circle class="rim" cx="80" cy="126" r="14" />
+        <circle class="rim" cx="120" cy="126" r="14" />
+        <path class="rim" d="M94 126 h12" />
       </g>
       <!--
         サングラスは**中を透かさない**（style.css）。透かしていたときは、
@@ -236,41 +230,11 @@ window.AIPET_SVG = `
         「物」に見えるかが決まる）。
       -->
       <g class="worn" id="ac-shades">
-        <path class="lens" d="M68 114 h26 v12 q -13 7 -26 0 Z" />
-        <path class="lens" d="M106 114 h26 v12 q -13 7 -26 0 Z" />
-        <path class="shine" d="M75 115 h5 l-6 11 h-5 Z" />
-        <path class="shine" d="M113 115 h5 l-6 11 h-5 Z" />
-        <path class="rim" d="M94 118 h12 M68 114 h64" />
-      </g>
-
-      <!-- 頭 ── 長丁場を越えてきた数。冠より下に描くので同時に出てよい -->
-      <!--
-        つるは**頭の上を通す。** 目の高さに掛けていたので、耳当てが顔の横に
-        浮いて見えていた ── この子に耳は無いので、位置で「頭に載っている」を
-        出すしかない。
-      -->
-      <g class="worn" id="ac-headphones">
-        <path class="band" d="M56 118 q 44 -52 88 0" />
-        <rect class="cup" x="44" y="112" width="15" height="26" rx="7" />
-        <rect class="cup" x="141" y="112" width="15" height="26" rx="7" />
-      </g>
-
-      <!-- 首 ── 席に着いた回数 -->
-      <!-- 口に掛けない。口元は型（persona.js）が決めるものなので、隠すと誰か分からなくなる -->
-      <g class="worn" id="ac-scarf">
-        <path class="cloth" d="M70 158 q 30 10 60 0 q 1 9 -6 12 q -24 8 -48 0 q -7 -3 -6 -12 Z" />
-        <path class="cloth" d="M124 169 q 10 8 7 18 q -9 1 -12 -6 Z" />
-      </g>
-
-      <!-- 頬 ── 空振りの数。**責める言葉は使わない**（やってきた証のほう） -->
-      <g class="worn" id="ac-bandage">
-        <path class="patch" d="M132 138 l14 -8 l6 10 l-14 8 Z" />
-      </g>
-
-      <!-- 耳 ── 称号の数 -->
-      <g class="worn" id="ac-earring">
-        <path class="wire" d="M50 126 v8" />
-        <circle class="stud" cx="50" cy="139" r="6" />
+        <path class="lens" d="M65 119 h29 v13 q -15 7 -29 0 Z" />
+        <path class="lens" d="M106 119 h29 v13 q -15 7 -29 0 Z" />
+        <path class="shine" d="M73 120 h5 l-6 12 h-5 Z" />
+        <path class="shine" d="M114 120 h5 l-6 12 h-5 Z" />
+        <path class="rim" d="M94 123 h12 M65 119 h70" />
       </g>
     </g>
 
@@ -280,8 +244,7 @@ window.AIPET_SVG = `
       1 時間で勝手に治る。手当ての操作は無いし、そのあいだ弱ってもいない
       ── 数字には 1 も効かない（DESIGN.md §3「世話される側にしない」）。
 
-      **絆創膏は左の頬**（x=62 あたり）。称号の絆創膏（ac-bandage）は
-      右の頬（x=132）なので、両方出ても重ならない。
+      絆創膏は左の頬（x=62 あたり）。
     -->
     <g id="hurt">
       <!-- 深い（負けた直後） -->
